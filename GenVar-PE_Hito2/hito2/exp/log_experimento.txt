@@ -1,0 +1,86 @@
+
+===== Escenario N = 1,000 genotipos =====
+  datos generados en 0.7 s; dump 0.1 MB
+  C1 sin:      0.32 ms  filas=3
+  C1   A:      0.34 ms  filas=3
+  C1   B:      0.32 ms  filas=3
+  C2 sin:      0.41 ms  filas=10
+  C2   A:      0.35 ms  filas=10
+  C2   B:      0.26 ms  filas=10
+  C3 sin:      1.05 ms  filas=6
+  C3   A:      1.03 ms  filas=6
+  C3   B:      1.05 ms  filas=6
+  C5 sin:      0.12 ms  filas=0
+  C5   A:      0.07 ms  filas=0
+  C5   B:      0.07 ms  filas=0
+  C6 sin:      0.53 ms  filas=5
+  C6   A:      0.56 ms  filas=5
+  C6   B:      0.54 ms  filas=5
+  C3  MV:      0.17 ms  filas=6  (refresh 3 ms)
+  insert_5000_genotipos: sin 168.2 ms | con 186.8 ms
+  update_1000_anotaciones: sin 1.9 ms | con 2.3 ms
+
+===== Escenario N = 10,000 genotipos =====
+  datos generados en 0.7 s; dump 0.3 MB
+  C1 sin:      0.87 ms  filas=26
+  C1   A:      0.88 ms  filas=26
+  C1   B:      0.89 ms  filas=26
+  C2 sin:      2.73 ms  filas=88
+  C2   A:      1.54 ms  filas=88
+  C2   B:      1.37 ms  filas=88
+  C3 sin:      8.87 ms  filas=67
+  C3   A:      8.47 ms  filas=67
+  C3   B:      8.51 ms  filas=67
+  C5 sin:      1.81 ms  filas=4
+  C5   A:      0.40 ms  filas=4
+  C5   B:      0.40 ms  filas=4
+  C6 sin:      5.56 ms  filas=6
+  C6   A:      5.17 ms  filas=6
+  C6   B:      5.18 ms  filas=6
+  C3  MV:      0.86 ms  filas=67  (refresh 9 ms)
+  insert_5000_genotipos: sin 120.9 ms | con 139.8 ms
+  update_1000_anotaciones: sin 16.4 ms | con 18.9 ms
+
+===== Escenario N = 100,000 genotipos =====
+  datos generados en 4.4 s; dump 2.0 MB
+  C1 sin:      4.53 ms  filas=129
+  C1   A:      4.48 ms  filas=129
+  C1   B:      4.13 ms  filas=129
+  C2 sin:     29.84 ms  filas=976
+  C2   A:     18.65 ms  filas=976
+  C2   B:     15.17 ms  filas=976
+  C3 sin:    121.21 ms  filas=558
+  C3   A:    119.01 ms  filas=558
+  C3   B:    118.89 ms  filas=558
+  C5 sin:     20.12 ms  filas=90
+  C5   A:      3.64 ms  filas=90
+  C5   B:      3.63 ms  filas=90
+  C6 sin:     32.91 ms  filas=10
+  C6   A:     34.69 ms  filas=10
+  C6   B:     32.72 ms  filas=10
+  C3  MV:      8.33 ms  filas=558  (refresh 106 ms)
+  insert_5000_genotipos: sin 154.7 ms | con 169.4 ms
+  update_1000_anotaciones: sin 30.7 ms | con 33.6 ms
+
+===== Escenario N = 1,000,000 genotipos =====
+  datos generados en 43.7 s; dump 22.2 MB
+  C1 sin:     21.11 ms  filas=208
+  C1   A:     16.24 ms  filas=208
+  C1   B:     14.28 ms  filas=208
+  C2 sin:    179.20 ms  filas=9523
+  C2   A:    224.95 ms  filas=9523
+  C2   B:    174.54 ms  filas=9523
+  C3 sin:   1383.77 ms  filas=2865
+  C3   A:   1400.80 ms  filas=2865
+  C3   B:   1154.47 ms  filas=2865
+  C5 sin:     92.51 ms  filas=905
+  C5   A:     37.26 ms  filas=905
+  C5   B:     38.27 ms  filas=905
+  C6 sin:   1434.13 ms  filas=161
+  C6   A:    495.10 ms  filas=161
+  C6   B:    477.33 ms  filas=161
+  C3  MV:     61.72 ms  filas=2865  (refresh 1248 ms)
+  insert_5000_genotipos: sin 146.4 ms | con 152.5 ms
+  update_1000_anotaciones: sin 45.8 ms | con 46.0 ms
+
+Resultados en /tmp/claude-0/-home-claude/f0a34881-a188-5e45-8ee3-975f694703c7/scratchpad/h2/exp/resultados.json

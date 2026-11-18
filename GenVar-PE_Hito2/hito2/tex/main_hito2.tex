@@ -1,0 +1,22 @@
+% Documento de prueba: compila solo las secciones 4-7.
+% En el informe real, copie el preámbulo que falte y ponga \input{hito2}
+\input{anexos} después de la Sección 3.
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs,graphicx,float,array,amsmath,xcolor,hyperref}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\footnotesize, breaklines=true, frame=single, columns=fullflexible,
+  keywordstyle=\color{blue!60!black}\bfseries, commentstyle=\color{gray}, stringstyle=\color{teal!70!black},
+  showstringspaces=false, upquote=true,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1
+           {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1 {Ñ}{{\~N}}1 {·}{{$\cdot$}}1}
+\renewcommand{\lstlistingname}{Listado}
+\graphicspath{{../}}
+\setcounter{section}{3}
+\begin{document}
+\input{hito2}
+\input{anexos}
+\end{document}

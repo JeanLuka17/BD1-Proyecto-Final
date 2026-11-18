@@ -1,0 +1,890 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish,es-noshorthands,es-tabla]{babel}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{pdflscape}
+\usepackage{caption}
+\usepackage[normalem]{ulem}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,shapes.misc,arrows.meta,positioning,calc,babel,fit,backgrounds}
+\usepackage[hidelinks]{hyperref}
+
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+\setlist{itemsep=0.15em,topsep=0.3em}
+\renewcommand{\arraystretch}{1.15}
+
+\newcommand{\pk}[1]{\underline{#1}}
+\newcommand{\ppk}[1]{\dashuline{#1}}
+\newcommand{\fk}[1]{\textit{#1}}
+\newcommand{\tb}[1]{\texttt{#1}}
+
+\tikzset{
+  ent/.style={draw, thick, rectangle, minimum width=2.7cm, minimum height=0.95cm, font=\bfseries\small, fill=blue!6, align=center},
+  weak/.style={ent, double, double distance=1.6pt},
+  rel/.style={draw, thick, diamond, aspect=2.3, inner sep=0.5pt, font=\small, fill=orange!12, align=center},
+  wrel/.style={rel, double, double distance=1.6pt},
+  att/.style={draw, ellipse, inner sep=0.6pt, minimum height=0.55cm, font=\scriptsize, fill=white},
+  datt/.style={att, dashed},
+  isa/.style={draw, thick, isosceles triangle, isosceles triangle apex angle=70, shape border rotate=90, inner sep=1.5pt, font=\scriptsize\bfseries, fill=green!10},
+  one/.style={-{Stealth[length=3.4mm,width=2.6mm]}},
+  tot/.style={double, double distance=1.8pt},
+  lnk/.style={thick},
+}
+
+\newcommand{\attr}[4]{\node[att] (#1) at ($(#2)+(#3)$) {#4}; \draw (#1) -- (#2);}
+\newcommand{\dattr}[4]{\node[datt] (#1) at ($(#2)+(#3)$) {#4}; \draw (#1) -- (#2);}
+
+\begin{document}
+\sloppy
+
+\begin{titlepage}
+\centering
+{\large Universidad de Ingeniería y Tecnología -- UTEC\par}
+\vspace{0.3cm}
+{\large Departamento de Ciencia de la Computación\par}
+\vspace{2.2cm}
+{\large CS2041 -- Base de Datos I\par}
+\vspace{0.8cm}
+{\LARGE\bfseries Proyecto Final -- Hito 1\par}
+\vspace{0.5cm}
+{\Huge\bfseries GenVar-PE\par}
+\vspace{0.3cm}
+{\Large Base de datos para la gestión de genómica\\ y variantes genéticas\par}
+\vspace{0.4cm}
+{\large Tópico 6: Genómica y Variantes Genéticas\par}
+\vspace{2.2cm}
+{\large\bfseries Integrantes\par}
+\vspace{0.3cm}
+\begin{tabular}{lc}
+Jean Luka Terrazo Santiago & \texttt{[202410422]}\\
+Piero Max Ortiz Villafuerte & \texttt{[202410409]}\\
+\end{tabular}
+\vfill
+{\large Profesores: Wilder Nina Choquehuayta\par}
+\vspace{0.3cm}
+{\large Ciclo 2026-2 \quad -- \quad Lima, Perú\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+%=====================================================================
+\section{Requisitos}
+%=====================================================================
+
+\subsection{Introducción}
+
+La secuenciación de ADN pasó en dos décadas de ser un proyecto internacional de miles de millones de dólares a un servicio rutinario de laboratorio. Cada genoma humano secuenciado produce millones de diferencias respecto del genoma de referencia (variantes genéticas), y la mayor parte del valor clínico y científico de esa información depende de poder cruzarla con otras fuentes: en qué gen cae la variante, qué tan frecuente es en la población, si ha sido reportada como causante de alguna enfermedad y en qué pacientes aparece.
+
+En este documento asumimos el rol de \textbf{cliente}: un consorcio de laboratorios de genómica que necesita una base de datos relacional para organizar ese cruce de información. El documento especifica los requerimientos que se entregarán a la empresa desarrolladora, y a partir de ellos se construyen el modelo Entidad-Relación y el modelo relacional normalizado del sistema, que llamaremos \textbf{GenVar-PE}. La implementación física en PostgreSQL, la carga masiva y la experimentación con índices corresponden al Hito~2.
+
+\subsection{Descripción general del problema/organización/empresa}
+
+El cliente es el \textbf{Consorcio de Genómica Andina (CGA)}\footnote{Organización ficticia creada para efectos del proyecto. Los datos de referencia sí provienen de fuentes públicas reales (ver Sección~\ref{sec:referencias}).}, una red de laboratorios peruanos (Lima, Arequipa y Cusco) que ofrece secuenciación genómica con dos fines:
+
+\begin{itemize}
+  \item \textbf{Diagnóstico clínico}: hospitales derivan pacientes con sospecha de enfermedades hereditarias (por ejemplo, cáncer de mama hereditario o cardiopatías familiares) o con tumores, para identificar variantes que expliquen o guíen el tratamiento.
+  \item \textbf{Investigación poblacional}: estudiar la variación genética de poblaciones peruanas, que están subrepresentadas en los grandes catálogos internacionales, construidos mayoritariamente con individuos de ascendencia europea.
+\end{itemize}
+
+Cada laboratorio cuenta con uno o más secuenciadores. El flujo de trabajo es: se recibe una muestra biológica de un donante (sangre, saliva o tejido tumoral), se extrae el ADN, se secuencia en una \emph{corrida} (\emph{run}) junto con otras muestras, y un \emph{pipeline} bioinformático produce la lista de variantes detectadas en cada muestra. Finalmente, un genetista clínico interpreta esas variantes usando anotaciones clínicas públicas.
+
+\subsection{Necesidad/usos de la base de datos}
+
+El CGA necesita un repositorio único y consistente que permita:
+
+\begin{enumerate}
+  \item \textbf{Trazabilidad completa}: saber, para cualquier genotipo reportado, de qué muestra, de qué donante, en qué corrida, en qué secuenciador y en qué laboratorio se obtuvo. Esto es obligatorio para auditorías y para repetir un análisis si una corrida resulta defectuosa.
+  \item \textbf{Interpretación clínica}: dado un paciente, listar sus variantes de calidad aceptable que caen en genes relevantes y que tienen una anotación clínica patogénica o probablemente patogénica.
+  \item \textbf{Análisis poblacional}: calcular la frecuencia de cada variante en la cohorte peruana y compararla con la frecuencia poblacional global de referencia, para detectar variantes enriquecidas localmente.
+  \item \textbf{Control de calidad}: identificar corridas, secuenciadores o laboratorios con métricas de calidad deficientes (baja cobertura, bajo porcentaje de bases con calidad Q30).
+  \item \textbf{Actualización de conocimiento}: las anotaciones clínicas cambian con el tiempo (una variante de significado incierto puede reclasificarse como patogénica). La base de datos debe permitir recargar las anotaciones sin tocar los genotipos ya almacenados, y así reevaluar pacientes antiguos.
+\end{enumerate}
+
+\subsection{¿Cómo resuelve el problema hoy?}
+
+\subsubsection{¿Cómo se almacenan/procesan los datos hoy?}
+
+Actualmente la información está fragmentada:
+
+\begin{itemize}
+  \item \textbf{Metadatos de donantes y muestras}: hojas de cálculo (Excel) mantenidas por cada laboratorio, con formatos de columnas distintos y códigos de muestra que a veces se repiten entre sedes.
+  \item \textbf{Metadatos de corridas}: archivos \emph{SampleSheet} en formato CSV que genera el secuenciador, más un cuaderno de laboratorio donde se anotan fechas y observaciones.
+  \item \textbf{Variantes}: un archivo VCF (\emph{Variant Call Format}) por muestra, almacenado en un servidor de archivos. Para saber si una variante aparece en otros pacientes hay que abrir y filtrar cientos de archivos con herramientas de línea de comandos.
+  \item \textbf{Anotaciones}: el genetista consulta manualmente las páginas web de ClinVar, dbSNP y gnomAD para cada variante candidata, y copia el resultado en un informe en Word.
+\end{itemize}
+
+Las consecuencias son: consultas transversales lentas (``¿qué pacientes portan esta variante?'' toma horas), inconsistencias entre sedes, imposibilidad de reevaluar pacientes antiguos cuando cambia una clasificación, y riesgo de errores al copiar información manualmente.
+
+\subsubsection{Flujo de datos}
+
+La Figura~\ref{fig:flujo} resume el flujo actual. Las cajas sombreadas indican los puntos donde la base de datos propuesta captura información.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=0.45cm and 0.45cm,
+  paso/.style={draw, rounded corners, thick, minimum height=1.1cm, text width=2.3cm, align=center, font=\small},
+  bd/.style={paso, fill=blue!10},
+  flecha/.style={-{Stealth[length=2.5mm]}, thick}]
+\node[bd] (a) {Registro de donante y consentimiento};
+\node[bd, right=of a] (b) {Colecta de muestra y extracción de ADN};
+\node[paso, right=of b] (c) {Preparación de librería (\emph{barcode})};
+\node[bd, right=of c] (d) {Corrida de secuenciación};
+\node[paso, below=0.9cm of d] (e) {Alineamiento (FASTQ $\rightarrow$ BAM)};
+\node[bd, left=of e] (f) {Llamado de variantes (VCF)};
+\node[bd, left=of f] (g) {Anotación (genes, consecuencia, ClinVar)};
+\node[paso, left=of g] (h) {Interpretación e informe clínico};
+\draw[flecha] (a) -- (b);
+\draw[flecha] (b) -- (c);
+\draw[flecha] (c) -- (d);
+\draw[flecha] (d) -- (e);
+\draw[flecha] (e) -- (f);
+\draw[flecha] (f) -- (g);
+\draw[flecha] (g) -- (h);
+\end{tikzpicture}
+\caption{Flujo de datos desde el donante hasta el informe clínico.}
+\label{fig:flujo}
+\end{figure}
+
+En el flujo propuesto, cada etapa sombreada inserta o actualiza registros en GenVar-PE: el registro del donante y la muestra al momento de la colecta; los datos de la corrida y las métricas por muestra al terminar la secuenciación; la carga masiva de genotipos al terminar el llamado de variantes; y la anotación de variantes cuando se importan las versiones nuevas de los catálogos de referencia. Los archivos crudos (FASTQ, BAM) siguen en el servidor de archivos; la base de datos solo guarda los resultados estructurados.
+
+\subsection{Descripción detallada del sistema}
+
+\subsubsection{Objetos de información actuales}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}p{11.8cm}}
+\toprule
+\textbf{Objeto} & \textbf{Descripción} \\
+\midrule
+\endhead
+Donante & Persona que aporta muestras. Se identifica con un código seudonimizado; no se almacenan nombres ni documentos de identidad. Se registra sexo biológico, año de nacimiento, población de ascendencia autodeclarada y si firmó consentimiento informado. \\
+Muestra biológica & Material extraído de un donante en una fecha dada. Puede ser \emph{germinal} (sangre, saliva o hisopado bucal; representa el genoma heredado) o \emph{tumoral} (tejido de un tumor; contiene además mutaciones adquiridas). Registra concentración de ADN y estado (recibida, en proceso, secuenciada, descartada). \\
+Laboratorio & Sede del consorcio que opera secuenciadores. \\
+Secuenciador & Equipo físico (modelo, fabricante, tecnología de lecturas cortas o largas) que pertenece a un laboratorio. \\
+Corrida de secuenciación & Ejecución del secuenciador en la que se procesan varias muestras a la vez, cada una identificada por un \emph{barcode}. Tiene tipo de ensayo (genoma completo WGS, exoma WES o panel de genes), fechas, estado y rendimiento en gigabases. \\
+Cromosoma & Cromosomas del ensamblado de referencia GRCh38: 1--22, X, Y y mitocondrial (MT), con su longitud en pares de bases. \\
+Gen de referencia & Gen anotado en el genoma de referencia (Ensembl/GENCODE): identificador estable (p.\,ej.\ \tb{ENSG00000012048}), símbolo oficial HGNC (p.\,ej.\ \tb{BRCA1}), biotipo, coordenadas y hebra. \\
+Exón & Segmento codificante de un gen, numerado dentro de su transcrito canónico. Solo tiene sentido en el contexto de su gen. \\
+Variante genética & Diferencia respecto a la referencia en una posición: cromosoma, posición, alelo de referencia y alelo alternativo. Incluye SNPs/SNVs (un nucleótido) e inserciones/deleciones pequeñas. Puede tener un identificador \tb{rs} de dbSNP y una frecuencia alélica poblacional global (gnomAD). \\
+Genotipo & Resultado de observar una variante en una muestra dentro de una corrida: genotipo (\tb{0/1} heterocigoto, \tb{1/1} homocigoto alternativo), profundidad de lectura, calidad Phred, fracción alélica (VAF) y filtro del pipeline. \\
+Efecto sobre un gen & Consecuencia predicha de una variante sobre un gen (\emph{missense}, sinónima, \emph{stop gained}, intrónica, etc.) y su impacto (alto, moderado, bajo, modificador). \\
+Condición clínica & Enfermedad o fenotipo (identificador MONDO/OMIM), con su modo de herencia. \\
+Anotación clínica & Evaluación publicada (ClinVar) que asocia una variante con una condición y le asigna un significado clínico según las categorías ACMG: patogénica, probablemente patogénica, significado incierto (VUS), probablemente benigna o benigna; con un nivel de revisión (0--4 estrellas) y fecha. \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Características y funcionalidades esperadas}
+
+\begin{itemize}
+  \item Registro y consulta de donantes, muestras, laboratorios, secuenciadores y corridas, garantizando que cada muestra pertenezca a un único donante y que cada corrida se haya ejecutado en un secuenciador existente.
+  \item Carga masiva de genotipos a partir de archivos VCF al cierre de cada corrida, rechazando genotipos de muestras que no estén registradas en esa corrida.
+  \item Catálogo único de variantes: una misma variante (mismo cromosoma, posición y alelos) se almacena una sola vez, aunque aparezca en miles de muestras.
+  \item Búsqueda de variantes por identificador \tb{rs}, por gen o por región genómica (cromosoma y rango de posiciones).
+  \item Reportes clínicos por donante y reportes poblacionales por gen o por variante.
+  \item Reportes de control de calidad por corrida, secuenciador y laboratorio.
+  \item Recarga periódica de las anotaciones clínicas y de las frecuencias poblacionales sin afectar los genotipos.
+  \item Control de acceso por tipo de usuario, con acceso a datos identificables del donante solo para personal autorizado.
+\end{itemize}
+
+\subsubsection{Tipos de usuarios existentes/necesarios}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.4cm} >{\raggedright\arraybackslash}p{11.6cm}}
+\toprule
+\textbf{Usuario} & \textbf{Rol y permisos} \\
+\midrule
+\endhead
+Técnico de laboratorio & Registra donantes, muestras y corridas; actualiza el estado de las muestras. No ve genotipos ni anotaciones. \\
+Bioinformático & Carga genotipos y métricas de secuenciación, carga y actualiza catálogos de referencia (genes, exones, variantes, frecuencias, anotaciones). Lectura y escritura sobre las tablas genómicas. \\
+Genetista clínico & Consulta el reporte de variantes de sus pacientes y las anotaciones clínicas. Solo lectura. \\
+Investigador & Consulta frecuencias agregadas de la cohorte. No accede a datos individuales de donantes (solo vistas agregadas). \\
+Auditor / Comité de ética & Revisa trazabilidad, consentimientos y bitácoras de carga. Solo lectura. \\
+Administrador de la BD & Crea usuarios y roles, respaldos, índices y mantenimiento. \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Tipos de consulta, actualizaciones}
+
+\paragraph{Consultas.} Las consultas más frecuentes que el cliente desea realizar son:
+
+\begin{enumerate}[label=\textbf{C\arabic*.}]
+  \item \textbf{Reporte clínico de un donante}: variantes con filtro \tb{PASS} y profundidad $\geq 20$ detectadas en cualquiera de sus muestras, que tengan una anotación clínica patogénica o probablemente patogénica, junto con el gen afectado, la consecuencia y la condición asociada.
+  \item \textbf{Portadores por gen}: para cada gen, número de donantes distintos que portan al menos una variante patogénica, y el porcentaje respecto al total de donantes secuenciados.
+  \item \textbf{Variantes enriquecidas en la cohorte}: variantes cuya frecuencia alélica en la cohorte del CGA supera en al menos 5 veces su frecuencia poblacional global, considerando solo variantes observadas en al menos 10 donantes.
+  \item \textbf{Control de calidad}: por laboratorio y secuenciador, número de corridas del último trimestre, cobertura media promedio y porcentaje de muestras con cobertura menor a 30$\times$ o con menos del 80\% de bases Q30.
+  \item \textbf{Consulta por región}: variantes \emph{missense} o de impacto alto dentro de un rango de posiciones de un cromosoma, con su número de muestras germinales y tumorales en que aparecen.
+  \item \textbf{Concordancia técnica}: muestras secuenciadas en más de una corrida y porcentaje de variantes cuyo genotipo difiere entre corridas.
+  \item \textbf{Búsqueda puntual}: dado un identificador \tb{rs} o un símbolo de gen, devolver la variante o las variantes con sus anotaciones.
+  \item \textbf{Reevaluación}: donantes que portan variantes cuya anotación clínica cambió de VUS a (probablemente) patogénica después de la fecha de su último informe.
+\end{enumerate}
+
+De este conjunto se elegirán las 5 consultas intermedias no triviales para la experimentación con índices del Hito~2.
+
+\paragraph{Actualizaciones.}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.3cm} >{\raggedright\arraybackslash}p{3cm} >{\raggedright\arraybackslash}p{7.4cm}}
+\toprule
+\textbf{Operación} & \textbf{Frecuencia} & \textbf{Descripción} \\
+\midrule
+\endhead
+Registro de donantes y muestras & Diaria & Inserciones individuales desde formulario (decenas por día). \\
+Actualización de estado de muestra & Diaria & \tb{UPDATE} puntual por clave primaria. \\
+Registro de corrida y métricas & Semanal & Una corrida con 8 a 96 muestras y sus métricas de secuenciación. \\
+Carga de genotipos & Semanal, por corrida & Inserción masiva (\tb{COPY}) de miles a millones de filas desde los VCF; inserta en el catálogo solo las variantes nuevas. \\
+Anotaciones clínicas & Mensual & Recarga desde la versión mensual de ClinVar: inserción de anotaciones nuevas y actualización de la significancia de las existentes. \\
+Genes, exones y frecuencias & Anual (por versión) & Carga estática al inicio; se actualiza con cada nueva versión de Ensembl/gnomAD. \\
+Cromosomas & Única vez & Carga estática del ensamblado GRCh38. \\
+Borrado de datos de un donante & Excepcional & Si el donante revoca el consentimiento, se eliminan sus muestras y genotipos en cascada. \\
+\bottomrule
+\end{longtable}
+
+\paragraph{Tiempos de respuesta esperados.} Búsquedas puntuales (C7) y actualizaciones por clave: menos de 100~ms. Reporte clínico de un donante (C1) y consulta por región (C5): menos de 1~s. Reportes agregados (C2, C3, C4, C6, C8): menos de 10~s, pues se ejecutan pocas veces al día. Carga de genotipos de una corrida: del orden de minutos.
+
+\subsubsection{Tamaño estimado de la base de datos}
+
+La Tabla~\ref{tab:volumen} estima el volumen para la operación del CGA durante sus primeros años, asumiendo un escenario de exomas y paneles (un exoma produce del orden de decenas de miles de variantes por muestra). Para la experimentación del Hito~2 se generarán cuatro \emph{dumps} con 1\,000, 10\,000, 100\,000 y 1\,000\,000 de registros en las tablas de hechos (\tb{genotipo} y \tb{variante}), escalando proporcionalmente las demás.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Tabla} & \textbf{Filas estimadas} & \textbf{Bytes/fila aprox.} & \textbf{Tamaño aprox.} \\
+\midrule
+cromosoma & 25 & 50 & $<$ 1 KB \\
+gen & 20\,000 & 150 & 3 MB \\
+exon & 200\,000 & 60 & 12 MB \\
+variante & 1\,000\,000 & 90 & 90 MB \\
+variante\_gen & 1\,200\,000 & 70 & 84 MB \\
+condicion & 10\,000 & 120 & 1.2 MB \\
+anotacion\_clinica & 300\,000 & 90 & 27 MB \\
+donante & 3\,000 & 60 & 0.2 MB \\
+muestra (+ subclases) & 4\,000 & 70 & 0.3 MB \\
+laboratorio / secuenciador & 3 / 10 & 100 & $<$ 1 KB \\
+corrida & 300 & 90 & 27 KB \\
+muestra\_corrida & 4\,500 & 80 & 0.4 MB \\
+genotipo & 100\,000\,000 & 65 & 6.5 GB \\
+\midrule
+\textbf{Total (sin índices)} & & & $\approx$ \textbf{6.8 GB} \\
+\bottomrule
+\end{tabular}
+\caption{Volumen estimado de GenVar-PE. Los bytes por fila incluyen la cabecera de tupla de PostgreSQL (24 bytes).}
+\label{tab:volumen}
+\end{table}
+
+La tabla \tb{genotipo} domina el tamaño: crece linealmente con el número de muestras secuenciadas (4\,500 secuenciaciones $\times$ $\sim$22\,000 variantes por exoma $\approx 10^8$ filas). Si el CGA pasara a genomas completos ($\sim$4 a 5 millones de variantes por muestra), la misma tabla llegaría a decenas de miles de millones de filas, lo cual queda fuera del alcance del proyecto y se discutirá en la pregunta extra del Hito~2.
+
+\subsection{Objetivos del proyecto}
+
+\textbf{Objetivo general.} Diseñar e implementar una base de datos relacional en PostgreSQL que integre la información de donantes, muestras, secuenciación, variantes genéticas, genes y anotaciones clínicas del CGA, garantizando su integridad y permitiendo consultas clínicas y poblacionales eficientes.
+
+\textbf{Objetivos específicos.}
+\begin{enumerate}
+  \item Especificar los requerimientos de datos, reglas semánticas, consultas y volúmenes del sistema.
+  \item Construir un modelo Entidad-Relación que represente fielmente el dominio, incluyendo multiplicidad, participación, una entidad débil, una jerarquía Is-A y una relación ternaria.
+  \item Transformar el modelo E/R en un modelo relacional en forma normal de Boyce-Codd (FNBC), con todas sus llaves y restricciones de integridad.
+  \item (Hito 2) Implementar el esquema en PostgreSQL, cargar datos reales y sintéticos, y crear vistas, procedimientos almacenados y \emph{triggers} para las reglas de negocio.
+  \item (Hito 2) Medir el impacto de distintos índices sobre cinco consultas críticas con 1\,000, 10\,000, 100\,000 y 1\,000\,000 de registros.
+\end{enumerate}
+
+\subsection{Referencias del proyecto}
+\label{sec:referencias}
+
+Fuentes de datos reales que se usarán para poblar la base de datos:
+
+\begin{itemize}
+  \item \textbf{Ensembl / GENCODE} (release para GRCh38): genes, coordenadas, biotipos y exones del transcrito canónico~\cite{ensembl}.
+  \item \textbf{dbSNP}: identificadores \tb{rs} de variantes~\cite{dbsnp}.
+  \item \textbf{gnomAD}: frecuencias alélicas poblacionales globales~\cite{gnomad}.
+  \item \textbf{ClinVar}: anotaciones clínicas de variantes y su nivel de revisión~\cite{clinvar}, cuyas categorías siguen las guías ACMG/AMP~\cite{acmg}.
+  \item \textbf{Proyecto 1000 Genomas}: archivos VCF públicos con genotipos reales, incluida la población peruana de Lima (PEL), que servirán como base de los genotipos~\cite{1000g}.
+  \item \textbf{MONDO / OMIM}: identificadores de condiciones clínicas.
+\end{itemize}
+
+Los donantes, muestras, laboratorios, secuenciadores, corridas y métricas de calidad se generarán sintéticamente con Python (\tb{Faker}, \tb{numpy}), respetando distribuciones plausibles, pues no existen datos públicos de ese tipo por razones de privacidad. Los genotipos de 1000 Genomas se reasignarán a donantes sintéticos y se completarán con genotipos simulados para alcanzar los volúmenes requeridos.
+
+Referencias conceptuales: el formato VCF~\cite{vcf}, los estudios de genómica de poblaciones peruanas~\cite{harris}, y los textos del curso sobre diseño de bases de datos~\cite{garcia,elmasri}.
+
+\subsection{Eventualidades}
+
+\subsubsection{Problemas que pudieran encontrarse en el proyecto}
+
+\begin{itemize}
+  \item \textbf{Representación de variantes}: una misma inserción o deleción puede escribirse de varias formas equivalentes, y un VCF puede listar varios alelos alternativos en una sola línea. Si no se normalizan (alineación a la izquierda y separación de multialélicos) antes de cargar, la misma variante aparecería duplicada en el catálogo.
+  \item \textbf{Versiones del genoma de referencia}: las coordenadas en GRCh37 y GRCh38 son distintas. Mezclarlas corrompería las consultas por región; se trabajará solo con GRCh38.
+  \item \textbf{Sistemas de coordenadas}: VCF usa posiciones que empiezan en 1 y el formato BED en 0. Un error de conversión desplaza todas las posiciones en una base.
+  \item \textbf{Identificadores inestables}: dbSNP fusiona y retira identificadores \tb{rs}, y los símbolos de genes cambian. Por eso el \tb{rs} no puede ser la llave primaria de la variante.
+  \item \textbf{Interpretaciones conflictivas}: distintos laboratorios pueden clasificar la misma variante de forma diferente para la misma condición; el modelo debe permitir varias anotaciones por par variante--condición.
+  \item \textbf{Volumen}: la tabla de genotipos crece mucho más rápido que las demás; la carga fila por fila sería inviable y habrá que usar \tb{COPY} y diseñar bien los índices.
+  \item \textbf{Privacidad}: los datos genéticos son datos sensibles según la Ley N.\textsuperscript{o}~29733 de Protección de Datos Personales del Perú~\cite{ley29733}. Se requiere seudonimización y control de acceso por roles.
+  \item \textbf{Realismo de datos sintéticos}: los genotipos simulados deben respetar que la mayoría de variantes son raras; una distribución uniforme haría que los resultados de la experimentación con índices no sean representativos.
+\end{itemize}
+
+\subsubsection{Límites y alcances del proyecto}
+
+\textbf{Alcance.}
+\begin{itemize}
+  \item Metadatos de donantes, muestras, laboratorios, secuenciadores y corridas.
+  \item Variantes cortas (SNVs/SNPs, MNVs e indels pequeños) sobre GRCh38, en cromosomas nucleares y mitocondrial.
+  \item Genes, exones del transcrito canónico, consecuencias predichas, condiciones y anotaciones clínicas.
+  \item Implementación en PostgreSQL con consultas, vistas, procedimientos, \emph{triggers} y experimentación con índices (Hito 2); MVP web opcional.
+\end{itemize}
+
+\textbf{Límites.}
+\begin{itemize}
+  \item No se almacenan lecturas crudas (FASTQ) ni alineamientos (BAM); solo se referencian por su ubicación si fuera necesario.
+  \item No se modelan variantes estructurales grandes (CNVs, translocaciones) ni múltiples transcritos por gen.
+  \item No se ejecuta el \emph{pipeline} bioinformático: se asume que los VCF ya están generados y normalizados.
+  \item El sistema no reemplaza el criterio del genetista: la base de datos no emite diagnósticos automáticos.
+  \item No se almacenan datos personales directamente identificables (nombre, DNI, dirección).
+\end{itemize}
+
+%=====================================================================
+\section{Modelo Entidad-Relación}
+%=====================================================================
+
+\subsection{Reglas semánticas}
+
+\begin{enumerate}[label=\textbf{RS\arabic*.}]
+  \item Un donante se identifica por un código único seudonimizado. Puede tener cero o más muestras (puede registrarse antes de la colecta).
+  \item Toda muestra pertenece a exactamente un donante.
+  \item Toda muestra es exactamente de un tipo: germinal o tumoral (especialización total y disjunta). Una muestra germinal registra su fuente (sangre, saliva, hisopado bucal); una tumoral registra el tipo de tumor, el estadio y la pureza tumoral (0--100\%).
+  \item Solo se pueden registrar muestras de donantes con consentimiento informado firmado.
+  \item Un laboratorio posee cero o más secuenciadores; cada secuenciador pertenece a exactamente un laboratorio.
+  \item Toda corrida se ejecuta en exactamente un secuenciador; un secuenciador puede tener cero o más corridas. El laboratorio de una corrida es el de su secuenciador.
+  \item Una corrida procesa una o más muestras, y una muestra puede secuenciarse en cero o más corridas (por ejemplo, al repetir una secuenciación fallida). Por cada par muestra--corrida se registra el \emph{barcode}, las lecturas totales, la cobertura media y el porcentaje de bases Q30.
+  \item Dentro de una corrida, cada \emph{barcode} identifica a una sola muestra.
+  \item La fecha de fin de una corrida no puede ser anterior a su fecha de inicio. La fecha de colecta de una muestra no puede ser posterior a la fecha de inicio de las corridas en las que se secuencia.
+  \item Un cromosoma se identifica por su nombre (1--22, X, Y, MT) y tiene una longitud positiva en pares de bases.
+  \item Todo gen está ubicado en exactamente un cromosoma, con posición de inicio menor o igual a la de fin, ambas dentro de la longitud del cromosoma, y en la hebra \tb{+} o \tb{-}.
+  \item Un exón solo existe como parte de un gen y se identifica por su número dentro de él (entidad débil). Sus coordenadas están dentro de las del gen.
+  \item Toda variante está ubicada en exactamente un cromosoma. Una variante queda determinada por (cromosoma, posición, alelo de referencia, alelo alternativo); no pueden existir dos variantes con esos cuatro valores iguales.
+  \item Los alelos de una variante son cadenas no vacías formadas solo por A, C, G y T, y el alelo de referencia es distinto del alternativo.
+  \item El tipo de variante (SNV, inserción, deleción, MNV) se deduce de las longitudes de sus alelos, por lo que es un atributo derivado.
+  \item El identificador \tb{rs} es opcional, pero si existe es único.
+  \item La frecuencia poblacional de una variante es un valor entre 0 y 1, o desconocida.
+  \item Una variante puede afectar a cero o más genes (cero si es intergénica), y un gen puede ser afectado por cero o más variantes. Por cada par se registra la consecuencia y su impacto (\tb{ALTO}, \tb{MODERADO}, \tb{BAJO}, \tb{MODIFICADOR}).
+  \item Un genotipo relaciona una muestra, una corrida y una variante. Solo puede registrarse si la muestra fue secuenciada en esa corrida. Por cada combinación hay a lo más un genotipo.
+  \item El genotipo toma valores \tb{0/1} o \tb{1/1} (solo se almacenan variantes presentes); la profundidad es un entero positivo; la calidad es no negativa; la VAF está entre 0 y 1.
+  \item Toda anotación clínica describe exactamente una variante y exactamente una condición. Una variante o una condición pueden tener cero o más anotaciones, y puede haber varias anotaciones (de distintos remitentes) para el mismo par variante--condición.
+  \item La significancia clínica pertenece al conjunto {patogénica, probablemente patogénica, VUS, probablemente benigna, benigna}, y el estado de revisión es un entero entre 0 y 4.
+  \item Si se elimina un donante (revocación de consentimiento), se eliminan en cascada sus muestras, sus participaciones en corridas y sus genotipos.
+\end{enumerate}
+
+\subsection{Modelo Entidad-Relación}
+
+El diagrama se presenta en la Figura~\ref{fig:er}. Se usa la notación del curso: rectángulos para entidades, rectángulo doble para entidad débil, rombos para relaciones, rombo doble para la relación identificadora, elipses para atributos (subrayado continuo para la llave, subrayado discontinuo para la llave parcial, borde discontinuo para atributo derivado) y triángulo para la jerarquía Is-A. Una \textbf{flecha} apunta hacia el lado ``a lo más uno'' de la relación; una \textbf{línea doble} indica participación total.
+
+\clearpage
+\paperwidth=297mm \paperheight=210mm
+\pdfpagewidth=\paperwidth \pdfpageheight=\paperheight
+\begingroup
+\setlength{\textwidth}{\dimexpr\paperwidth-2.6cm\relax}
+\setlength{\textheight}{\dimexpr\paperheight-3.2cm\relax}
+\setlength{\oddsidemargin}{\dimexpr1.3cm-1in\relax}
+\setlength{\evensidemargin}{\oddsidemargin}
+\setlength{\topmargin}{\dimexpr1.3cm-1in-\headheight-\headsep\relax}
+\setlength{\columnwidth}{\textwidth}\setlength{\hsize}{\textwidth}
+\setlength{\linewidth}{\textwidth}\setlength{\vsize}{\textheight}
+\csname @colht\endcsname=\textheight \csname @colroom\endcsname=\textheight
+\begin{figure}[p]
+\centering
+\resizebox{!}{0.9\textheight}{%
+\begin{tikzpicture}[font=\small]
+
+% ---------- Entidades ----------
+\node[ent] (Don) at (1.5,13) {Donante};
+\node[ent] (Mue) at (8.8,13) {Muestra};
+\node[ent] (Cor) at (16.8,13) {Corrida};
+\node[ent] (Sec) at (23.8,13) {Secuenciador};
+\node[ent] (Lab) at (23.8,17.8) {Laboratorio};
+\node[ent] (Ger) at (5.4,17.6) {Muestra\_Germinal};
+\node[ent] (Tum) at (11.2,17.6) {Muestra\_Tumoral};
+\node[ent] (Var) at (12.8,6) {Variante};
+\node[ent] (Ano) at (4.2,6) {Anotacion\_Clinica};
+\node[ent] (Con) at (4.2,0.2) {Condicion};
+\node[ent] (Cro) at (17.3,0.2) {Cromosoma};
+\node[ent] (Gen) at (21.6,6) {Gen};
+\node[weak] (Exo) at (25.6,2.4) {Exon};
+
+% ---------- Relaciones ----------
+\node[rel] (Dona) at (5.1,13) {Dona};
+\node[rel] (SecEn) at (12.8,13) {Secuenciada\\En};
+\node[rel] (Usa) at (20.3,13) {Usa};
+\node[rel] (Posee) at (23.8,15.4) {Posee};
+\node[rel] (Det) at (12.8,9.3) {Detecta};
+\node[rel] (Desc) at (8.4,6) {Describe};
+\node[rel] (Asoc) at (4.2,3.1) {Asociada};
+\node[rel] (Ubi) at (14.6,3.1) {Ubica};
+\node[rel] (Cont) at (19.9,3.1) {Contiene};
+\node[rel] (Afe) at (17.2,6) {Afecta};
+\node[wrel] (Tie) at (25.6,6) {Tiene};
+\node[isa] (ISA) at (8.8,15.1) {ES\_UN};
+\node[font=\scriptsize\itshape, align=left, anchor=west] at (9.6,14.9) {total,\\disjunta};
+
+% ---------- Conexiones ----------
+\draw[lnk, one] (Dona) -- (Don);
+\draw[lnk, tot] (Dona) -- (Mue);
+\draw[lnk] (Mue) -- (SecEn);
+\draw[lnk, tot] (SecEn) -- (Cor);
+\draw[lnk, tot] (Cor) -- (Usa);
+\draw[lnk, one] (Usa) -- (Sec);
+\draw[lnk, tot] (Sec) -- (Posee);
+\draw[lnk, one] (Posee) -- (Lab);
+\draw[lnk, tot] (Mue) -- (ISA);
+\draw[lnk] (ISA.apex) -- (Ger);
+\draw[lnk] (ISA.apex) -- (Tum);
+\draw[lnk] (Det) -- (Mue);
+\draw[lnk] (Det) -- (Cor);
+\draw[lnk] (Det) -- (Var);
+\draw[lnk, tot] (Ano) -- (Desc);
+\draw[lnk, one] (Desc) -- (Var);
+\draw[lnk, tot] (Ano) -- (Asoc);
+\draw[lnk, one] (Asoc) -- (Con);
+\draw[lnk, tot] (Var) -- (Ubi);
+\draw[lnk, one] (Ubi) -- (Cro);
+\draw[lnk, tot] (Gen) -- (Cont);
+\draw[lnk, one] (Cont) -- (Cro);
+\draw[lnk] (Var) -- (Afe);
+\draw[lnk] (Afe) -- (Gen);
+\draw[lnk, one] (Tie) -- (Gen);
+\draw[lnk, tot] (Exo) -- (Tie);
+
+% ---------- Atributos ----------
+% Donante
+\attr{a1}{Don}{-1.6,1.8}{\pk{id\_donante}}
+\attr{a2}{Don}{0.4,2.6}{sexo}
+\attr{a3}{Don}{2.2,1.8}{consentimiento}
+\attr{a4}{Don}{-1.3,-1.8}{anio\_nacimiento}
+\attr{a5}{Don}{1.5,-2.0}{poblacion}
+% Muestra
+\attr{b1}{Mue}{-2.9,-1.3}{\pk{id\_muestra}}
+\attr{b2}{Mue}{-0.2,-2.3}{fecha\_colecta}
+\attr{b3}{Mue}{-2.3,1.5}{conc\_adn}
+\attr{b4}{Mue}{-2.0,-2.6}{estado}
+% Subclases
+\attr{g1}{Ger}{-2.7,0}{fuente}
+\attr{t1}{Tum}{-1.2,1.4}{tipo\_tumor}
+\attr{t2}{Tum}{0.6,1.6}{estadio}
+\attr{t3}{Tum}{3.0,0.8}{pureza\_tumoral}
+% Secuenciada_En
+\attr{s1}{SecEn}{-1.1,1.7}{barcode}
+\attr{s2}{SecEn}{-0.6,3.0}{cobertura\_media}
+\attr{s3}{SecEn}{1.2,2.4}{lecturas\_totales}
+\attr{s4}{SecEn}{1.6,1.3}{pct\_q30}
+% Corrida
+\attr{c1}{Cor}{-0.3,2.0}{\pk{id\_corrida}}
+\attr{c2}{Cor}{1.6,2.5}{tipo\_ensayo}
+\attr{c3}{Cor}{3.0,1.5}{fecha\_inicio}
+\attr{c4}{Cor}{0.5,-1.8}{estado}
+\attr{c5}{Cor}{2.2,-1.5}{fecha\_fin}
+\attr{c6}{Cor}{4.0,-2.0}{rendimiento\_gb}
+% Secuenciador
+\attr{q1}{Sec}{2.6,1.3}{\pk{id\_secuenciador}}
+\attr{q2}{Sec}{3.0,0}{modelo}
+\attr{q3}{Sec}{2.6,-1.3}{fabricante}
+\attr{q4}{Sec}{0.2,-1.9}{tecnologia}
+% Laboratorio
+\attr{l1}{Lab}{-2.8,0.6}{\pk{id\_laboratorio}}
+\attr{l2}{Lab}{-2.6,-0.7}{nombre}
+\attr{l3}{Lab}{2.6,0.6}{ciudad}
+\attr{l4}{Lab}{2.6,-0.7}{pais}
+% Detecta
+\attr{d1}{Det}{-2.5,0.6}{genotipo}
+\attr{d2}{Det}{-2.6,-0.5}{profundidad}
+\attr{d3}{Det}{2.4,0.6}{calidad}
+\attr{d4}{Det}{2.6,-0.5}{vaf}
+\attr{d5}{Det}{-1.7,-1.4}{filtro}
+% Variante
+\attr{v1}{Var}{-1.0,1.2}{\pk{id\_variante}}
+\attr{v2}{Var}{1.5,1.2}{rsid}
+\attr{v3}{Var}{-2.9,-1.2}{posicion}
+\attr{v4}{Var}{-2.0,-2.2}{alelo\_ref}
+\attr{v5}{Var}{-0.4,-3.0}{alelo\_alt}
+\attr{v6}{Var}{2.6,-1.3}{frec\_poblacional}
+\dattr{v7}{Var}{-3.6,0.95}{tipo\_variante}
+% Afecta
+\attr{f1}{Afe}{-0.6,1.5}{consecuencia}
+\attr{f2}{Afe}{1.1,-1.3}{impacto}
+% Gen
+\attr{e1}{Gen}{-2.0,1.5}{\pk{id\_gen}}
+\attr{e2}{Gen}{-0.3,2.2}{simbolo}
+\attr{e3}{Gen}{1.5,1.7}{nombre}
+\attr{e4}{Gen}{3.3,2.4}{biotipo}
+\attr{e5}{Gen}{-1.2,-1.9}{inicio}
+\attr{e6}{Gen}{0.6,-1.9}{fin}
+\attr{e7}{Gen}{2.1,-0.9}{hebra}
+% Exon
+\attr{x1}{Exo}{-2.6,-0.9}{\ppk{numero\_exon}}
+\attr{x2}{Exo}{-0.6,-1.7}{inicio}
+\attr{x3}{Exo}{1.4,-1.5}{fin}
+% Cromosoma
+\attr{r1}{Cro}{-2.6,-1.3}{\pk{id\_cromosoma}}
+\attr{r2}{Cro}{0,-1.8}{longitud\_pb}
+\attr{r3}{Cro}{2.4,-1.3}{tipo}
+% Anotacion
+\attr{n1}{Ano}{-2.2,1.5}{\pk{id\_anotacion}}
+\attr{n2}{Ano}{0.9,1.8}{significancia}
+\attr{n3}{Ano}{-3.7,0}{fecha\_evaluacion}
+\attr{n4}{Ano}{-2.7,-1.4}{estado\_revision}
+% Condicion
+\attr{o1}{Con}{-2.9,0.7}{\pk{id\_condicion}}
+\attr{o2}{Con}{-2.3,-1.2}{nombre}
+\attr{o3}{Con}{2.6,-1.0}{modo\_herencia}
+
+\end{tikzpicture}}
+\caption{Modelo Entidad-Relación de GenVar-PE.}
+\label{fig:er}
+\end{figure}
+\clearpage
+\endgroup
+\paperwidth=210mm \paperheight=297mm
+\pdfpagewidth=\paperwidth \pdfpageheight=\paperheight
+
+\subsection{Especificaciones y consideraciones sobre el modelo}
+
+\paragraph{Resumen del modelo.} El diagrama tiene 13 conjuntos de entidades (11 fuertes, una débil y dos subclases dentro de ellas) y 12 relaciones (10 binarias, una ternaria y la jerarquía Is-A).
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Relación} & \textbf{Entidades} & \textbf{Multiplicidad} & \textbf{Participación total} \\
+\midrule
+Dona & Donante -- Muestra & 1 : N & Muestra \\
+Posee & Laboratorio -- Secuenciador & 1 : N & Secuenciador \\
+Usa & Secuenciador -- Corrida & 1 : N & Corrida \\
+Secuenciada\_En & Muestra -- Corrida & M : N & Corrida \\
+Detecta & Muestra -- Corrida -- Variante & M : N : P & -- \\
+Ubica & Cromosoma -- Variante & 1 : N & Variante \\
+Contiene & Cromosoma -- Gen & 1 : N & Gen \\
+Tiene (identificadora) & Gen -- Exon & 1 : N & Exon \\
+Afecta & Variante -- Gen & M : N & -- \\
+Describe & Variante -- Anotacion\_Clinica & 1 : N & Anotacion\_Clinica \\
+Asociada & Condicion -- Anotacion\_Clinica & 1 : N & Anotacion\_Clinica \\
+ES\_UN & Muestra $\supset$ \{Germinal, Tumoral\} & total, disjunta & Muestra \\
+\bottomrule
+\end{tabular}
+\caption{Resumen de relaciones, multiplicidad y participación.}
+\end{table}
+
+\paragraph{Exón como entidad débil.} Los exones se numeran 1, 2, 3, \dots\ dentro de cada gen; el ``exón 3'' no significa nada sin decir de qué gen. Su llave parcial \tb{numero\_exon} solo es única dentro del gen, por lo que la llave completa se forma con la llave del gen propietario a través de la relación identificadora \emph{Tiene}.
+
+\paragraph{Por qué \emph{Detecta} es ternaria.} Podría pensarse en reemplazarla por dos relaciones binarias (Muestra--Variante y Corrida--Variante), pero eso pierde información: si la muestra $m_1$ se secuenció en las corridas $r_1$ y $r_2$ y la variante $v$ se observó en $m_1$ y en la corrida $r_1$, las dos binarias no permiten distinguir si $v$ se vio en $m_1$ \emph{durante} $r_1$ o en otra muestra de $r_1$. Además los atributos del genotipo (profundidad, calidad, VAF) dependen de las tres entidades a la vez: la misma variante de la misma muestra puede tener distinta profundidad en dos corridas. Esta relación es la que alimenta la consulta de concordancia técnica (C6).
+
+\paragraph{Restricción entre \emph{Detecta} y \emph{Secuenciada\_En}.} La regla RS19 exige que el par (muestra, corrida) de un genotipo exista en \emph{Secuenciada\_En}. El diagrama E/R no puede expresar esta restricción; se hará cumplir en el modelo relacional mediante una llave foránea compuesta (Sección~\ref{sec:ternaria}).
+
+\paragraph{Jerarquía Is-A.} Se especializa \emph{Muestra} porque los dos tipos tienen atributos propios que no aplican al otro (la pureza tumoral no tiene sentido en una muestra de saliva). La cobertura es \textbf{total} (no hay muestras de otro tipo) y \textbf{disjunta} (una muestra no puede ser germinal y tumoral a la vez).
+
+\paragraph{Atributo derivado \tb{tipo\_variante}.} Se dibuja con borde discontinuo porque se calcula a partir de las longitudes de los alelos: si ambos miden 1 es SNV; si la referencia es más corta, inserción; si es más larga, deleción; si miden igual y más de 1, MNV. Guardarlo como columna introduciría una dependencia funcional $\{\text{alelo\_ref}, \text{alelo\_alt}\} \rightarrow \text{tipo\_variante}$ cuyo lado izquierdo no es superllave, rompiendo la FNBC (ver Sección~\ref{sec:normalizacion}). En el Hito~2 se implementará como columna generada o dentro de una vista.
+
+\paragraph{Por qué no hay relación Laboratorio--Corrida.} El laboratorio de una corrida ya se obtiene siguiendo Corrida $\rightarrow$ Secuenciador $\rightarrow$ Laboratorio. Una relación directa sería redundante y podría volverse inconsistente (una corrida asignada a un laboratorio distinto del dueño de su secuenciador).
+
+\paragraph{Llave de Variante.} La llave natural es (cromosoma, posición, alelo\_ref, alelo\_alt), pero es compuesta y larga, y se propagaría a las tablas más grandes (\tb{genotipo} y \tb{variante\_gen}). Por eso se usa una llave sustituta \tb{id\_variante}, manteniendo la llave natural como llave candidata (\tb{UNIQUE}). El \tb{rsid} no sirve como llave porque es opcional y dbSNP lo fusiona o retira.
+
+\paragraph{Anotación clínica como entidad.} Se modela como entidad (y no como atributo de la relación Variante--Condición) porque puede haber varias evaluaciones del mismo par variante--condición emitidas por distintos laboratorios, incluso contradictorias. Cada una tiene su propio identificador de ClinVar.
+
+\paragraph{Genes en regiones pseudoautosómicas.} Algunos genes aparecen tanto en X como en Y. En GRCh38 cada copia tiene un identificador distinto, por lo que la restricción ``un gen en exactamente un cromosoma'' se mantiene.
+
+%=====================================================================
+\section{Modelo Relacional}
+%=====================================================================
+
+\subsection{Modelo Relacional}
+
+Notación: llave primaria \pk{subrayada}, llaves foráneas en \fk{cursiva} con la tabla referenciada entre corchetes.
+
+\begin{itemize}[leftmargin=1.2em, itemsep=0.4em]
+  \item \textbf{Cromosoma}(\pk{id\_cromosoma}, longitud\_pb, tipo)
+  \item \textbf{Gen}(\pk{id\_gen}, simbolo, nombre, biotipo, \fk{id\_cromosoma}, inicio, fin, hebra)\\
+        \fk{id\_cromosoma} $\rightarrow$ [Cromosoma]; \quad \tb{UNIQUE}(simbolo)
+  \item \textbf{Exon}(\pk{\fk{id\_gen}, numero\_exon}, inicio, fin)\\
+        \fk{id\_gen} $\rightarrow$ [Gen] \tb{ON DELETE CASCADE}
+  \item \textbf{Variante}(\pk{id\_variante}, rsid, \fk{id\_cromosoma}, posicion, alelo\_ref, alelo\_alt, frec\_poblacional)\\
+        \fk{id\_cromosoma} $\rightarrow$ [Cromosoma]\\ \tb{UNIQUE}(id\_cromosoma, posicion, alelo\_ref, alelo\_alt); \quad \tb{UNIQUE}(rsid)
+  \item \textbf{Variante\_Gen}(\pk{\fk{id\_variante}, \fk{id\_gen}}, consecuencia, impacto)\\
+        \fk{id\_variante} $\rightarrow$ [Variante]; \quad \fk{id\_gen} $\rightarrow$ [Gen]
+  \item \textbf{Condicion}(\pk{id\_condicion}, nombre, modo\_herencia)
+  \item \textbf{Anotacion\_Clinica}(\pk{id\_anotacion}, \fk{id\_variante}, \fk{id\_condicion}, significancia, estado\_revision, fecha\_evaluacion)\\
+        \fk{id\_variante} $\rightarrow$ [Variante]; \quad \fk{id\_condicion} $\rightarrow$ [Condicion]
+  \item \textbf{Donante}(\pk{id\_donante}, sexo, anio\_nacimiento, poblacion, consentimiento)
+  \item \textbf{Muestra}(\pk{id\_muestra}, \fk{id\_donante}, fecha\_colecta, conc\_adn, estado)\\
+        \fk{id\_donante} $\rightarrow$ [Donante] \tb{ON DELETE CASCADE}
+  \item \textbf{Muestra\_Germinal}(\pk{\fk{id\_muestra}}, fuente)\\
+        \fk{id\_muestra} $\rightarrow$ [Muestra] \tb{ON DELETE CASCADE}
+  \item \textbf{Muestra\_Tumoral}(\pk{\fk{id\_muestra}}, tipo\_tumor, estadio, pureza\_tumoral)\\
+        \fk{id\_muestra} $\rightarrow$ [Muestra] \tb{ON DELETE CASCADE}
+  \item \textbf{Laboratorio}(\pk{id\_laboratorio}, nombre, ciudad, pais)
+  \item \textbf{Secuenciador}(\pk{id\_secuenciador}, \fk{id\_laboratorio}, modelo, fabricante, tecnologia)\\
+        \fk{id\_laboratorio} $\rightarrow$ [Laboratorio]
+  \item \textbf{Corrida}(\pk{id\_corrida}, \fk{id\_secuenciador}, tipo\_ensayo, fecha\_inicio, fecha\_fin, estado, rendimiento\_gb)\\
+        \fk{id\_secuenciador} $\rightarrow$ [Secuenciador]
+  \item \textbf{Muestra\_Corrida}(\pk{\fk{id\_muestra}, \fk{id\_corrida}}, barcode, lecturas\_totales, cobertura\_media, pct\_q30)\\
+        \fk{id\_muestra} $\rightarrow$ [Muestra] \tb{ON DELETE CASCADE}; \quad \fk{id\_corrida} $\rightarrow$ [Corrida]\\ \tb{UNIQUE}(id\_corrida, barcode)
+  \item \textbf{Genotipo}(\pk{\fk{id\_muestra}, \fk{id\_corrida}, \fk{id\_variante}}, genotipo, profundidad, calidad, vaf, filtro)\\
+        (\fk{id\_muestra}, \fk{id\_corrida}) $\rightarrow$ [Muestra\_Corrida] \tb{ON DELETE CASCADE}; \quad \fk{id\_variante} $\rightarrow$ [Variante]
+\end{itemize}
+
+\paragraph{Restricciones de integridad adicionales (\tb{CHECK}).}\begingroup\sloppy
+\begin{itemize}
+  \item \tb{Cromosoma}: \tb{longitud\_pb > 0}; \tb{tipo IN ('AUTOSOMA', 'SEXUAL', 'MITOCONDRIAL')}.
+  \item \tb{Gen}: \tb{1 <= inicio <= fin}; \tb{hebra IN ('+', '-')}. Que \tb{fin} no supere la longitud del cromosoma involucra otra tabla y se validará con un \emph{trigger} (Hito~2).
+  \item \tb{Exon}: \tb{numero\_exon >= 1}; \tb{inicio <= fin}; que el exón esté dentro del gen se valida con \emph{trigger}.
+  \item \tb{Variante}: \tb{posicion >= 1}; alelos que cumplen la expresión regular \tb{\textasciicircum[ACGT]+\$}; \tb{alelo\_ref <> alelo\_alt}; \tb{frec\_poblacional} entre 0 y 1 o nula.
+  \item \tb{Variante\_Gen}: \tb{impacto IN ('ALTO', 'MODERADO', 'BAJO', 'MODIFICADOR')}.
+  \item \tb{Anotacion\_Clinica}: \tb{significancia IN ('PATOGENICA', 'PROBABLEMENTE\_PATOGENICA', 'VUS', 'PROBABLEMENTE\_BENIGNA', 'BENIGNA')}; \tb{estado\_revision} entre 0 y 4.
+  \item \tb{Donante}: \tb{sexo IN ('F', 'M', 'X')}; \tb{anio\_nacimiento} entre 1900 y el año actual.
+  \item \tb{Muestra}: \tb{conc\_adn > 0}; \tb{estado IN ('RECIBIDA', 'EN\_PROCESO', 'SECUENCIADA', 'DESCARTADA')}. RS4 (consentimiento) y la cobertura total/disjunta de la jerarquía se implementarán con \emph{triggers}.
+  \item \tb{Muestra\_Tumoral}: \tb{pureza\_tumoral} entre 0 y 100.
+  \item \tb{Corrida}: \tb{tipo\_ensayo IN ('WGS', 'WES', 'PANEL')}; \tb{fecha\_fin IS NULL OR fecha\_fin >= fecha\_inicio}; \tb{rendimiento\_gb >= 0}.
+  \item \tb{Muestra\_Corrida}: \tb{lecturas\_totales >= 0}; \tb{cobertura\_media >= 0}; \tb{pct\_q30} entre 0 y 100.
+  \item \tb{Genotipo}: \tb{genotipo IN ('0/1', '1/1')}; \tb{profundidad > 0}; \tb{calidad >= 0}; \tb{vaf} entre 0 y 1.
+\end{itemize}\endgroup
+
+\subsection{Especificaciones de transformación}
+
+\subsubsection{Entidades}
+
+Cada entidad fuerte se transforma en una relación con los mismos atributos simples y la misma llave: \tb{Cromosoma}, \tb{Gen}, \tb{Variante}, \tb{Condicion}, \tb{Anotacion\_Clinica}, \tb{Donante}, \tb{Muestra}, \tb{Laboratorio}, \tb{Secuenciador} y \tb{Corrida}. El atributo derivado \tb{tipo\_variante} no se almacena.
+
+\subsubsection{Entidades débiles}
+
+La entidad débil \emph{Exon} se transforma en la relación \tb{Exon}, cuya llave primaria es la unión de la llave del propietario (\tb{id\_gen}) y la llave parcial (\tb{numero\_exon}). La relación identificadora \emph{Tiene} no genera tabla propia: queda representada por la llave foránea \tb{id\_gen}. Se usa \tb{ON DELETE CASCADE} porque un exón no puede existir sin su gen.
+
+\subsubsection{Entidades superclase/subclases}
+
+Para la jerarquía \emph{Muestra} $\supset$ \{\emph{Germinal}, \emph{Tumoral}\} se usa el \textbf{enfoque E/R} (una tabla por clase): la superclase \tb{Muestra} guarda los atributos comunes y cada subclase guarda su llave (que es a la vez llave foránea a \tb{Muestra}) más sus atributos propios. Se descartaron las alternativas porque:
+
+\begin{itemize}
+  \item \textbf{Solo subclases} (enfoque orientado a objetos): \tb{Muestra} es referenciada por \tb{Muestra\_Corrida} y, por ella, por \tb{Genotipo}, la tabla más grande. Sin una tabla \tb{Muestra} única, la llave foránea tendría que apuntar a dos tablas distintas, lo que SQL no permite directamente.
+  \item \textbf{Una sola tabla con nulos}: tendría columnas siempre nulas en las muestras germinales (tipo de tumor, estadio, pureza) y no permitiría declarar \tb{NOT NULL} sobre atributos obligatorios de cada subclase.
+\end{itemize}
+
+La cobertura total y disjunta (toda muestra está en exactamente una subclase) no se puede expresar solo con llaves; se garantizará con \emph{triggers} en el Hito~2.
+
+\subsubsection{Relaciones binarias}
+
+\begin{itemize}
+  \item \textbf{Uno a muchos} (\emph{Dona}, \emph{Posee}, \emph{Usa}, \emph{Ubica}, \emph{Contiene}, \emph{Describe}, \emph{Asociada}): no generan tabla. Se añade la llave del lado ``uno'' como llave foránea en la tabla del lado ``muchos''. Como el lado ``muchos'' tiene participación total en todas ellas, la llave foránea se declara \tb{NOT NULL}. Por ejemplo, \emph{Dona} se convierte en \tb{Muestra.id\_donante} \tb{NOT NULL}.
+  \item \textbf{Muchos a muchos} (\emph{Secuenciada\_En}, \emph{Afecta}): generan una tabla propia (\tb{Muestra\_Corrida} y \tb{Variante\_Gen}) cuya llave primaria es la unión de las llaves de las dos entidades, más los atributos de la relación. En \tb{Muestra\_Corrida} se añade la llave candidata (\tb{id\_corrida}, \tb{barcode}) por la regla RS8.
+  \item La participación total de \emph{Corrida} en \emph{Secuenciada\_En} (toda corrida tiene al menos una muestra) no es expresable con llaves foráneas; se controlará con un \emph{trigger} diferido o al cerrar la corrida.
+\end{itemize}
+
+\subsubsection{Relaciones ternarias}
+\label{sec:ternaria}
+
+La relación ternaria \emph{Detecta} (Muestra, Corrida, Variante), sin flechas, se transforma en la tabla \tb{Genotipo}, cuya llave primaria es la unión de las tres llaves (\tb{id\_muestra}, \tb{id\_corrida}, \tb{id\_variante}) más los atributos de la relación.
+
+La transformación estándar pondría una llave foránea hacia cada entidad. Aquí, en cambio, el par (\tb{id\_muestra}, \tb{id\_corrida}) se declara como \textbf{una sola llave foránea compuesta hacia \tb{Muestra\_Corrida}}. Esto sigue garantizando que la muestra y la corrida existan (porque \tb{Muestra\_Corrida} ya las referencia) y además impone la regla RS19: no se puede registrar un genotipo de una muestra en una corrida en la que no fue secuenciada.
+
+\subsection{Normalización}
+\label{sec:normalizacion}
+
+Se verificó que cada relación está en \textbf{FNBC}: en todas, las únicas dependencias funcionales no triviales tienen como lado izquierdo una llave candidata.
+
+\begin{itemize}
+  \item Las relaciones con llave primaria simple (\tb{Cromosoma}, \tb{Condicion}, \tb{Donante}, \tb{Laboratorio}, \tb{Secuenciador}, \tb{Corrida}, \tb{Muestra}, subclases, \tb{Anotacion\_Clinica}) tienen como única fuente de dependencias su llave. En \tb{Gen}, \tb{simbolo} también determina todos los atributos, pero es llave candidata.
+  \item En \tb{Variante}, las dependencias son id\_variante $\rightarrow$ todo, \{id\_cromosoma, posicion, alelo\_ref, alelo\_alt\} $\rightarrow$ todo y rsid $\rightarrow$ todo; las tres son llaves candidatas. Si se almacenara \tb{tipo\_variante} aparecería \{alelo\_ref, alelo\_alt\} $\rightarrow$ tipo\_variante, violando la FNBC; por eso se trata como derivado.
+  \item En \tb{Muestra\_Corrida}, $\{\text{id\_muestra, id\_corrida}\}$ y $\{\text{id\_corrida, barcode}\}$ son llaves candidatas.
+  \item En \tb{Genotipo} no se almacena el número de lecturas del alelo alternativo junto con la profundidad y la VAF, porque $\text{vaf} = \text{lecturas\_alt} / \text{profundidad}$ haría a uno de los tres derivable de los otros dos.
+  \item En \tb{Corrida} no se guarda el laboratorio, pues $\text{id\_secuenciador} \rightarrow \text{id\_laboratorio}$ sería una dependencia transitiva (violación de 3FN).
+  \item Ningún atributo es multivaluado (1FN): los exones de un gen y los genes afectados por una variante se guardan en tablas separadas en lugar de listas.
+\end{itemize}
+
+\subsection{Diccionario de datos}
+
+Los tipos indicados son los que se usarán en PostgreSQL. \textbf{PK}: llave primaria; \textbf{FK}: llave foránea; \textbf{UQ}: único; \textbf{NN}: no nulo.
+
+\newcommand{\dictab}[2]{%
+\par\medskip\noindent\textbf{Tabla \tb{#1}} -- #2\par\smallskip
+}
+\newenvironment{dic}{%
+\small
+\begin{longtable}{>{\ttfamily}p{3.1cm} >{\ttfamily}p{2.9cm} p{1.9cm} >{\raggedright\arraybackslash}p{6.6cm}}
+\toprule
+\normalfont\textbf{Atributo} & \normalfont\textbf{Tipo} & \textbf{Restr.} & \textbf{Descripción} \\
+\midrule
+\endhead
+}{%
+\bottomrule
+\end{longtable}
+}
+
+\dictab{cromosoma}{cromosomas del ensamblado GRCh38.}
+\begin{dic}
+id\_cromosoma & VARCHAR(2) & PK & Nombre: \tb{1}--\tb{22}, \tb{X}, \tb{Y}, \tb{MT}. \\
+longitud\_pb & BIGINT & NN, $>0$ & Longitud en pares de bases. \\
+tipo & VARCHAR(12) & NN, CHECK & AUTOSOMA, SEXUAL o MITOCONDRIAL. \\
+\end{dic}
+
+\dictab{gen}{genes de referencia (Ensembl).}
+\begin{dic}
+id\_gen & VARCHAR(20) & PK & Identificador estable Ensembl (\tb{ENSG\ldots}). \\
+simbolo & VARCHAR(30) & NN, UQ & Símbolo oficial HGNC (\tb{BRCA1}). \\
+nombre & VARCHAR(200) & & Nombre descriptivo del gen. \\
+biotipo & VARCHAR(40) & NN & \tb{protein\_coding}, \tb{lncRNA}, etc. \\
+id\_cromosoma & VARCHAR(2) & FK, NN & Cromosoma donde se ubica. \\
+inicio & BIGINT & NN, CHECK & Posición inicial (1-based). \\
+fin & BIGINT & NN, CHECK & Posición final, $\geq$ inicio. \\
+hebra & CHAR(1) & NN, CHECK & \tb{+} o \tb{-}. \\
+\end{dic}
+
+\dictab{exon}{exones del transcrito canónico (entidad débil).}
+\begin{dic}
+id\_gen & VARCHAR(20) & PK, FK & Gen propietario. \\
+numero\_exon & SMALLINT & PK, $\geq 1$ & Número del exón dentro del gen. \\
+inicio & BIGINT & NN & Posición inicial. \\
+fin & BIGINT & NN, CHECK & Posición final, $\geq$ inicio. \\
+\end{dic}
+
+\dictab{variante}{catálogo único de variantes genéticas.}
+\begin{dic}
+id\_variante & BIGSERIAL & PK & Llave sustituta. \\
+rsid & VARCHAR(15) & UQ & Identificador dbSNP (\tb{rs80357906}); opcional. \\
+id\_cromosoma & VARCHAR(2) & FK, NN & Cromosoma de la variante. \\
+posicion & BIGINT & NN, $\geq 1$ & Posición (1-based, como en VCF). \\
+alelo\_ref & VARCHAR(50) & NN, CHECK & Alelo en la referencia (\tb{[ACGT]+}). \\
+alelo\_alt & VARCHAR(50) & NN, CHECK & Alelo observado, distinto de \tb{alelo\_ref}. \\
+frec\_poblacional & NUMERIC(8,7) & CHECK & Frecuencia alélica global (gnomAD), $[0,1]$; nula si se desconoce. \\
+\multicolumn{4}{l}{\normalfont\footnotesize UQ compuesta: (\tb{id\_cromosoma}, \tb{posicion}, \tb{alelo\_ref}, \tb{alelo\_alt}).} \\
+\end{dic}
+
+\dictab{variante\_gen}{efecto predicho de una variante sobre un gen (M:N).}
+\begin{dic}
+id\_variante & BIGINT & PK, FK & Variante. \\
+id\_gen & VARCHAR(20) & PK, FK & Gen afectado. \\
+consecuencia & VARCHAR(40) & NN & Término Sequence Ontology (\tb{missense\_variant}, \tb{stop\_gained}, \ldots). \\
+impacto & VARCHAR(11) & NN, CHECK & ALTO, MODERADO, BAJO o MODIFICADOR. \\
+\end{dic}
+
+\dictab{condicion}{enfermedades o fenotipos.}
+\begin{dic}
+id\_condicion & VARCHAR(20) & PK & Identificador MONDO u OMIM. \\
+nombre & VARCHAR(200) & NN & Nombre de la condición. \\
+modo\_herencia & VARCHAR(30) & & Autosómica dominante, recesiva, ligada al X, etc. \\
+\end{dic}
+
+\dictab{anotacion\_clinica}{evaluaciones clínicas de variantes (ClinVar).}
+\begin{dic}
+id\_anotacion & VARCHAR(20) & PK & Accesión ClinVar (\tb{SCV\ldots}). \\
+id\_variante & BIGINT & FK, NN & Variante evaluada. \\
+id\_condicion & VARCHAR(20) & FK, NN & Condición asociada. \\
+significancia & VARCHAR(26) & NN, CHECK & Categoría ACMG. \\
+estado\_revision & SMALLINT & NN, CHECK & Estrellas de revisión, 0 a 4. \\
+fecha\_evaluacion & DATE & & Fecha de la última evaluación. \\
+\end{dic}
+
+\dictab{donante}{personas que aportan muestras (seudonimizadas).}
+\begin{dic}
+id\_donante & VARCHAR(12) & PK & Código seudonimizado (\tb{CGA-D000123}). \\
+sexo & CHAR(1) & NN, CHECK & F, M o X (no determinado). \\
+anio\_nacimiento & SMALLINT & CHECK & Año de nacimiento (no la fecha, por privacidad). \\
+poblacion & VARCHAR(40) & & Ascendencia autodeclarada. \\
+consentimiento & BOOLEAN & NN & Firmó consentimiento informado. \\
+\end{dic}
+
+\dictab{muestra}{muestras biológicas (superclase).}
+\begin{dic}
+id\_muestra & VARCHAR(14) & PK & Código de muestra (\tb{CGA-M0004567}). \\
+id\_donante & VARCHAR(12) & FK, NN & Donante de origen. \\
+fecha\_colecta & DATE & NN & Fecha de colecta. \\
+conc\_adn & NUMERIC(7,2) & CHECK & Concentración de ADN (ng/$\mu$L), $> 0$. \\
+estado & VARCHAR(12) & NN, CHECK & RECIBIDA, EN\_PROCESO, SECUENCIADA, DESCARTADA. \\
+\end{dic}
+
+\dictab{muestra\_germinal}{subclase de muestra.}
+\begin{dic}
+id\_muestra & VARCHAR(14) & PK, FK & Muestra. \\
+fuente & VARCHAR(15) & NN, CHECK & SANGRE, SALIVA o HISOPADO\_BUCAL. \\
+\end{dic}
+
+\dictab{muestra\_tumoral}{subclase de muestra.}
+\begin{dic}
+id\_muestra & VARCHAR(14) & PK, FK & Muestra. \\
+tipo\_tumor & VARCHAR(60) & NN & Tipo de tumor (p.\,ej. carcinoma ductal). \\
+estadio & VARCHAR(5) & & Estadio clínico (I--IV). \\
+pureza\_tumoral & NUMERIC(5,2) & CHECK & Porcentaje de células tumorales, 0--100. \\
+\end{dic}
+
+\dictab{laboratorio}{sedes del consorcio.}
+\begin{dic}
+id\_laboratorio & SERIAL & PK & Identificador. \\
+nombre & VARCHAR(80) & NN, UQ & Nombre de la sede. \\
+ciudad & VARCHAR(40) & NN & Ciudad. \\
+pais & VARCHAR(40) & NN & País. \\
+\end{dic}
+
+\dictab{secuenciador}{equipos de secuenciación.}
+\begin{dic}
+id\_secuenciador & VARCHAR(20) & PK & Número de serie del equipo. \\
+id\_laboratorio & INTEGER & FK, NN & Laboratorio propietario. \\
+modelo & VARCHAR(40) & NN & Modelo del equipo. \\
+fabricante & VARCHAR(40) & NN & Fabricante. \\
+tecnologia & VARCHAR(12) & NN, CHECK & LECTURA\_CORTA o LECTURA\_LARGA. \\
+\end{dic}
+
+\dictab{corrida}{corridas de secuenciación.}
+\begin{dic}
+id\_corrida & VARCHAR(30) & PK & Identificador de la corrida. \\
+id\_secuenciador & VARCHAR(20) & FK, NN & Equipo usado. \\
+tipo\_ensayo & VARCHAR(5) & NN, CHECK & WGS, WES o PANEL. \\
+fecha\_inicio & TIMESTAMP & NN & Inicio de la corrida. \\
+fecha\_fin & TIMESTAMP & CHECK & Fin; nula si está en curso. \\
+estado & VARCHAR(12) & NN, CHECK & EN\_CURSO, COMPLETADA o FALLIDA. \\
+rendimiento\_gb & NUMERIC(8,2) & CHECK & Gigabases producidas, $\geq 0$. \\
+\end{dic}
+
+\dictab{muestra\_corrida}{participación de una muestra en una corrida (M:N).}
+\begin{dic}
+id\_muestra & VARCHAR(14) & PK, FK & Muestra. \\
+id\_corrida & VARCHAR(30) & PK, FK & Corrida. \\
+barcode & VARCHAR(20) & NN & Índice de la librería; UQ junto con \tb{id\_corrida}. \\
+lecturas\_totales & BIGINT & CHECK & Lecturas obtenidas, $\geq 0$. \\
+cobertura\_media & NUMERIC(7,2) & CHECK & Profundidad media ($\times$), $\geq 0$. \\
+pct\_q30 & NUMERIC(5,2) & CHECK & \% de bases con calidad $\geq$ Q30. \\
+\end{dic}
+
+\dictab{genotipo}{relación ternaria muestra--corrida--variante.}
+\begin{dic}
+id\_muestra & VARCHAR(14) & PK, FK & Muestra (FK compuesta a \tb{muestra\_corrida}). \\
+id\_corrida & VARCHAR(30) & PK, FK & Corrida (FK compuesta a \tb{muestra\_corrida}). \\
+id\_variante & BIGINT & PK, FK & Variante detectada. \\
+genotipo & VARCHAR(3) & NN, CHECK & \tb{0/1} o \tb{1/1}. \\
+profundidad & INTEGER & NN, CHECK & Lecturas que cubren la posición, $> 0$. \\
+calidad & REAL & CHECK & Calidad Phred del llamado, $\geq 0$. \\
+vaf & NUMERIC(4,3) & CHECK & Fracción de lecturas con el alelo alternativo, $[0,1]$. \\
+filtro & VARCHAR(20) & NN & \tb{PASS} o motivo de rechazo del \emph{pipeline}. \\
+\end{dic}
+
+%=====================================================================
+\begin{thebibliography}{99}
+\bibitem{garcia} H. Garcia-Molina, J. D. Ullman y J. Widom, \emph{Database Systems: The Complete Book}, 2.\textsuperscript{a} ed. Pearson, 2008.
+\bibitem{elmasri} R. Elmasri y S. B. Navathe, \emph{Fundamentals of Database Systems}, 7.\textsuperscript{a} ed. Pearson, 2016.
+\bibitem{ensembl} F. J. Martin \emph{et al.}, ``Ensembl 2023'', \emph{Nucleic Acids Research}, vol. 51, n.\textsuperscript{o} D1, pp. D933--D941, 2023.
+\bibitem{dbsnp} S. T. Sherry \emph{et al.}, ``dbSNP: the NCBI database of genetic variation'', \emph{Nucleic Acids Research}, vol. 29, n.\textsuperscript{o} 1, pp. 308--311, 2001.
+\bibitem{gnomad} K. J. Karczewski \emph{et al.}, ``The mutational constraint spectrum quantified from variation in 141,456 humans'', \emph{Nature}, vol. 581, pp. 434--443, 2020.
+\bibitem{clinvar} M. J. Landrum \emph{et al.}, ``ClinVar: improving access to variant interpretations and supporting evidence'', \emph{Nucleic Acids Research}, vol. 46, n.\textsuperscript{o} D1, pp. D1062--D1067, 2018.
+\bibitem{acmg} S. Richards \emph{et al.}, ``Standards and guidelines for the interpretation of sequence variants'', \emph{Genetics in Medicine}, vol. 17, n.\textsuperscript{o} 5, pp. 405--424, 2015.
+\bibitem{1000g} The 1000 Genomes Project Consortium, ``A global reference for human genetic variation'', \emph{Nature}, vol. 526, pp. 68--74, 2015.
+\bibitem{vcf} P. Danecek \emph{et al.}, ``The variant call format and VCFtools'', \emph{Bioinformatics}, vol. 27, n.\textsuperscript{o} 15, pp. 2156--2158, 2011.
+\bibitem{harris} D. N. Harris \emph{et al.}, ``Evolutionary genomic dynamics of Peruvians before, during, and after the Inca Empire'', \emph{PNAS}, vol. 115, n.\textsuperscript{o} 28, pp. E6526--E6535, 2018.
+\bibitem{ley29733} Congreso de la República del Perú, \emph{Ley N.\textsuperscript{o} 29733, Ley de Protección de Datos Personales}, 2011.
+\bibitem{postgres} The PostgreSQL Global Development Group, \emph{PostgreSQL Documentation}. Disponible en: \url{https://www.postgresql.org/docs/}.
+\end{thebibliography}
+
+\end{document}

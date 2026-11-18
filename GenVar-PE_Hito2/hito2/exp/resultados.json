@@ -1,0 +1,1916 @@
+{
+ "1000": {
+  "n": 1000,
+  "t_carga_s": 0.6991050243377686,
+  "conteos": {
+   "anotacion_clinica": 76,
+   "anotacion_historial": 0,
+   "bitacora": 0,
+   "condicion": 50,
+   "corrida": 4,
+   "cromosoma": 25,
+   "donante": 40,
+   "exon": 816,
+   "gen": 100,
+   "genotipo": 1000,
+   "informe": 21,
+   "laboratorio": 3,
+   "muestra": 47,
+   "muestra_corrida": 49,
+   "muestra_germinal": 36,
+   "muestra_tumoral": 11,
+   "secuenciador": 10,
+   "stg_genotipo": 0,
+   "variante": 250,
+   "variante_gen": 168
+  },
+  "parametros": {
+   "donante": "CGA-D000010",
+   "crom": "1",
+   "ini": 1,
+   "fin": 50000000
+  },
+  "consultas": {
+   "C1": {
+    "sin": {
+     "mediana_ms": 0.318,
+     "min_ms": 0.298,
+     "max_ms": 0.444,
+     "tiempos_ms": [
+      0.318,
+      0.318,
+      0.444,
+      0.309,
+      0.381,
+      0.298,
+      0.312
+     ],
+     "filas": 3,
+     "nodos": [
+      "Index Scan gen (gen_pkey)",
+      "Index Scan variante (variante_pkey)",
+      "Index Scan variante_gen (variante_gen_pkey)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan condicion",
+      "Seq Scan genotipo",
+      "Seq Scan muestra"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 0.34,
+     "min_ms": 0.307,
+     "max_ms": 0.417,
+     "tiempos_ms": [
+      0.34,
+      0.378,
+      0.334,
+      0.379,
+      0.32,
+      0.307,
+      0.417
+     ],
+     "filas": 3,
+     "nodos": [
+      "Index Scan gen (gen_pkey)",
+      "Index Scan variante (variante_pkey)",
+      "Index Scan variante_gen (variante_gen_pkey)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan condicion",
+      "Seq Scan genotipo",
+      "Seq Scan muestra"
+     ],
+     "t_crear_indices_ms": 3.9191246032714844
+    },
+    "B": {
+     "mediana_ms": 0.323,
+     "min_ms": 0.303,
+     "max_ms": 0.383,
+     "tiempos_ms": [
+      0.346,
+      0.303,
+      0.364,
+      0.323,
+      0.314,
+      0.383,
+      0.323
+     ],
+     "filas": 3,
+     "nodos": [
+      "Index Scan gen (gen_pkey)",
+      "Index Scan variante (variante_pkey)",
+      "Index Scan variante_gen (variante_gen_pkey)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan condicion",
+      "Seq Scan genotipo",
+      "Seq Scan muestra"
+     ],
+     "t_crear_indices_ms": 2.6161670684814453
+    }
+   },
+   "C2": {
+    "sin": {
+     "mediana_ms": 0.414,
+     "min_ms": 0.366,
+     "max_ms": 0.592,
+     "tiempos_ms": [
+      0.592,
+      0.542,
+      0.414,
+      0.366,
+      0.43,
+      0.401,
+      0.413
+     ],
+     "filas": 10,
+     "nodos": [
+      "Seq Scan anotacion_clinica",
+      "Seq Scan gen",
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 0.348,
+     "min_ms": 0.317,
+     "max_ms": 0.532,
+     "tiempos_ms": [
+      0.405,
+      0.399,
+      0.327,
+      0.333,
+      0.317,
+      0.532,
+      0.348
+     ],
+     "filas": 10,
+     "nodos": [
+      "Index Scan genotipo (ix_gen_variante)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan gen",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 2.6340484619140625
+    },
+    "B": {
+     "mediana_ms": 0.262,
+     "min_ms": 0.242,
+     "max_ms": 0.298,
+     "tiempos_ms": [
+      0.285,
+      0.249,
+      0.261,
+      0.294,
+      0.262,
+      0.298,
+      0.242
+     ],
+     "filas": 10,
+     "nodos": [
+      "Index Only Scan genotipo (ix_gen_var_cub)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan gen",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 8.185386657714844
+    }
+   },
+   "C3": {
+    "sin": {
+     "mediana_ms": 1.054,
+     "min_ms": 0.995,
+     "max_ms": 1.493,
+     "tiempos_ms": [
+      1.493,
+      1.028,
+      1.087,
+      1.039,
+      1.054,
+      0.995,
+      1.207
+     ],
+     "filas": 6,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 1.034,
+     "min_ms": 0.963,
+     "max_ms": 1.332,
+     "tiempos_ms": [
+      1.015,
+      0.963,
+      1.034,
+      1.056,
+      1.332,
+      0.996,
+      1.078
+     ],
+     "filas": 6,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante"
+     ],
+     "t_crear_indices_ms": 2.4178028106689453
+    },
+    "B": {
+     "mediana_ms": 1.046,
+     "min_ms": 0.991,
+     "max_ms": 1.28,
+     "tiempos_ms": [
+      1.029,
+      0.991,
+      1.046,
+      1.108,
+      1.28,
+      1.016,
+      1.113
+     ],
+     "filas": 6,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante"
+     ],
+     "t_crear_indices_ms": 2.855539321899414
+    }
+   },
+   "C5": {
+    "sin": {
+     "mediana_ms": 0.115,
+     "min_ms": 0.112,
+     "max_ms": 0.179,
+     "tiempos_ms": [
+      0.117,
+      0.112,
+      0.112,
+      0.116,
+      0.115,
+      0.179,
+      0.113
+     ],
+     "filas": 0,
+     "nodos": [
+      "Index Only Scan genotipo (genotipo_pkey)",
+      "Index Only Scan muestra_germinal (muestra_germinal_pkey)",
+      "Index Only Scan muestra_tumoral (muestra_tumoral_pkey)",
+      "Index Scan gen (gen_pkey)",
+      "Seq Scan variante",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 0.075,
+     "min_ms": 0.071,
+     "max_ms": 0.111,
+     "tiempos_ms": [
+      0.08,
+      0.075,
+      0.071,
+      0.075,
+      0.076,
+      0.111,
+      0.072
+     ],
+     "filas": 0,
+     "nodos": [
+      "Index Only Scan muestra_germinal (muestra_germinal_pkey)",
+      "Index Only Scan muestra_tumoral (muestra_tumoral_pkey)",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan genotipo (ix_gen_variante)",
+      "Seq Scan variante",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 5.57708740234375
+    },
+    "B": {
+     "mediana_ms": 0.072,
+     "min_ms": 0.064,
+     "max_ms": 0.097,
+     "tiempos_ms": [
+      0.074,
+      0.07,
+      0.097,
+      0.064,
+      0.065,
+      0.075,
+      0.072
+     ],
+     "filas": 0,
+     "nodos": [
+      "Index Only Scan muestra_germinal (muestra_germinal_pkey)",
+      "Index Only Scan muestra_tumoral (muestra_tumoral_pkey)",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan genotipo (ix_gen_var_hash)",
+      "Seq Scan variante",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 3.4761428833007812
+    }
+   },
+   "C6": {
+    "sin": {
+     "mediana_ms": 0.526,
+     "min_ms": 0.498,
+     "max_ms": 0.545,
+     "tiempos_ms": [
+      0.545,
+      0.502,
+      0.498,
+      0.537,
+      0.526,
+      0.517,
+      0.537
+     ],
+     "filas": 5,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 0.555,
+     "min_ms": 0.5,
+     "max_ms": 0.562,
+     "tiempos_ms": [
+      0.504,
+      0.557,
+      0.511,
+      0.559,
+      0.562,
+      0.555,
+      0.5
+     ],
+     "filas": 5,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 3.115415573120117
+    },
+    "B": {
+     "mediana_ms": 0.542,
+     "min_ms": 0.502,
+     "max_ms": 0.573,
+     "tiempos_ms": [
+      0.506,
+      0.551,
+      0.542,
+      0.502,
+      0.549,
+      0.514,
+      0.573
+     ],
+     "filas": 5,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 2.572298049926758
+    }
+   }
+  },
+  "c3_vista_materializada": {
+   "mediana_ms": 0.17,
+   "min_ms": 0.161,
+   "max_ms": 0.202,
+   "tiempos_ms": [
+    0.17,
+    0.169,
+    0.161,
+    0.187,
+    0.202,
+    0.193,
+    0.167
+   ],
+   "filas": 6,
+   "nodos": [
+    "Seq Scan muestra",
+    "Seq Scan muestra_corrida",
+    "Seq Scan mv_frec_variante",
+    "Seq Scan variante"
+   ],
+   "t_refresh_ms": 2.624988555908203,
+   "t_crear_ms": 2.471923828125
+  },
+  "actualizaciones": {
+   "sin": {
+    "insert_5000_genotipos": {
+     "mediana_ms": 168.185,
+     "tiempos_ms": [
+      161.89499999999998,
+      165.757,
+      170.636,
+      168.753,
+      174.03,
+      168.185,
+      167.823
+     ]
+    },
+    "update_1000_anotaciones": {
+     "mediana_ms": 1.859,
+     "tiempos_ms": [
+      4.352,
+      1.859,
+      2.316,
+      1.8279999999999998,
+      1.847,
+      1.8170000000000002,
+      2.018
+     ]
+    }
+   },
+   "con": {
+    "insert_5000_genotipos": {
+     "mediana_ms": 186.82,
+     "tiempos_ms": [
+      177.597,
+      180.26,
+      186.898,
+      184.185,
+      188.536,
+      186.82,
+      187.485
+     ]
+    },
+    "update_1000_anotaciones": {
+     "mediana_ms": 2.322,
+     "tiempos_ms": [
+      9.552,
+      2.304,
+      2.342,
+      2.474,
+      2.061,
+      2.192,
+      2.322
+     ]
+    }
+   },
+   "t_crear_finales_ms": 17.977237701416016,
+   "tam_indices": {
+    "ix_muestra_donante": 16384,
+    "ix_anot_patog": 16384,
+    "ix_anot_variante": 16384,
+    "ix_gen_var_mue": 2097152,
+    "ix_var_region": 16384,
+    "ix_gen_mue_var": 2015232
+   },
+   "genotipo_total": 10076160,
+   "genotipo_heap": 5529600
+  }
+ },
+ "10000": {
+  "n": 10000,
+  "t_carga_s": 0.7179925441741943,
+  "conteos": {
+   "anotacion_clinica": 721,
+   "anotacion_historial": 2,
+   "bitacora": 0,
+   "condicion": 50,
+   "corrida": 4,
+   "cromosoma": 25,
+   "donante": 40,
+   "exon": 1646,
+   "gen": 200,
+   "genotipo": 10000,
+   "informe": 16,
+   "laboratorio": 3,
+   "muestra": 51,
+   "muestra_corrida": 49,
+   "muestra_germinal": 38,
+   "muestra_tumoral": 13,
+   "secuenciador": 10,
+   "stg_genotipo": 0,
+   "variante": 2499,
+   "variante_gen": 1728
+  },
+  "parametros": {
+   "donante": "CGA-D000035",
+   "crom": "1",
+   "ini": 1,
+   "fin": 50000000
+  },
+  "consultas": {
+   "C1": {
+    "sin": {
+     "mediana_ms": 0.873,
+     "min_ms": 0.847,
+     "max_ms": 0.959,
+     "tiempos_ms": [
+      0.959,
+      0.874,
+      0.873,
+      0.858,
+      0.856,
+      0.847,
+      0.903
+     ],
+     "filas": 26,
+     "nodos": [
+      "Bitmap Heap Scan genotipo",
+      "Index Scan condicion (condicion_pkey)",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan variante (variante_pkey)",
+      "Index Scan variante_gen (variante_gen_pkey)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan muestra"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 0.882,
+     "min_ms": 0.827,
+     "max_ms": 0.907,
+     "tiempos_ms": [
+      0.891,
+      0.868,
+      0.901,
+      0.827,
+      0.882,
+      0.907,
+      0.86
+     ],
+     "filas": 26,
+     "nodos": [
+      "Bitmap Heap Scan genotipo",
+      "Index Scan condicion (condicion_pkey)",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan variante (variante_pkey)",
+      "Index Scan variante_gen (variante_gen_pkey)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan muestra"
+     ],
+     "t_crear_indices_ms": 3.650665283203125
+    },
+    "B": {
+     "mediana_ms": 0.886,
+     "min_ms": 0.826,
+     "max_ms": 1.069,
+     "tiempos_ms": [
+      0.972,
+      0.886,
+      0.882,
+      1.069,
+      0.826,
+      0.855,
+      0.926
+     ],
+     "filas": 26,
+     "nodos": [
+      "Bitmap Heap Scan genotipo",
+      "Index Scan condicion (condicion_pkey)",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan variante (variante_pkey)",
+      "Index Scan variante_gen (variante_gen_pkey)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan muestra"
+     ],
+     "t_crear_indices_ms": 2.3565292358398438
+    }
+   },
+   "C2": {
+    "sin": {
+     "mediana_ms": 2.725,
+     "min_ms": 2.688,
+     "max_ms": 2.905,
+     "tiempos_ms": [
+      2.705,
+      2.905,
+      2.725,
+      2.693,
+      2.729,
+      2.688,
+      2.743
+     ],
+     "filas": 88,
+     "nodos": [
+      "Seq Scan anotacion_clinica",
+      "Seq Scan gen",
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 1.538,
+     "min_ms": 1.51,
+     "max_ms": 1.626,
+     "tiempos_ms": [
+      1.626,
+      1.519,
+      1.538,
+      1.563,
+      1.51,
+      1.513,
+      1.556
+     ],
+     "filas": 88,
+     "nodos": [
+      "Index Scan genotipo (ix_gen_variante)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan gen",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 5.400419235229492
+    },
+    "B": {
+     "mediana_ms": 1.373,
+     "min_ms": 1.311,
+     "max_ms": 1.554,
+     "tiempos_ms": [
+      1.411,
+      1.311,
+      1.492,
+      1.554,
+      1.373,
+      1.322,
+      1.343
+     ],
+     "filas": 88,
+     "nodos": [
+      "Index Only Scan anotacion_clinica (ix_anot_patog)",
+      "Index Only Scan genotipo (ix_gen_var_cub)",
+      "Seq Scan gen",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 8.78453254699707
+    }
+   },
+   "C3": {
+    "sin": {
+     "mediana_ms": 8.866,
+     "min_ms": 8.458,
+     "max_ms": 10.325,
+     "tiempos_ms": [
+      8.552,
+      8.458,
+      8.591,
+      9.968,
+      10.325,
+      8.866,
+      9.57
+     ],
+     "filas": 67,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 8.466,
+     "min_ms": 8.376,
+     "max_ms": 8.684,
+     "tiempos_ms": [
+      8.47,
+      8.684,
+      8.466,
+      8.481,
+      8.376,
+      8.42,
+      8.414
+     ],
+     "filas": 67,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante"
+     ],
+     "t_crear_indices_ms": 5.7697296142578125
+    },
+    "B": {
+     "mediana_ms": 8.512,
+     "min_ms": 8.391,
+     "max_ms": 8.76,
+     "tiempos_ms": [
+      8.525,
+      8.404,
+      8.391,
+      8.76,
+      8.626,
+      8.395,
+      8.512
+     ],
+     "filas": 67,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante"
+     ],
+     "t_crear_indices_ms": 7.973432540893555
+    }
+   },
+   "C5": {
+    "sin": {
+     "mediana_ms": 1.807,
+     "min_ms": 1.786,
+     "max_ms": 1.842,
+     "tiempos_ms": [
+      1.842,
+      1.821,
+      1.786,
+      1.794,
+      1.816,
+      1.807,
+      1.8
+     ],
+     "filas": 4,
+     "nodos": [
+      "Bitmap Heap Scan variante",
+      "Index Scan gen (gen_pkey)",
+      "Seq Scan genotipo",
+      "Seq Scan muestra_germinal",
+      "Seq Scan muestra_tumoral",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 0.4,
+     "min_ms": 0.383,
+     "max_ms": 0.422,
+     "tiempos_ms": [
+      0.415,
+      0.405,
+      0.422,
+      0.4,
+      0.383,
+      0.393,
+      0.386
+     ],
+     "filas": 4,
+     "nodos": [
+      "Bitmap Heap Scan variante",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan genotipo (ix_gen_variante)",
+      "Seq Scan muestra_germinal",
+      "Seq Scan muestra_tumoral",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 9.674549102783203
+    },
+    "B": {
+     "mediana_ms": 0.399,
+     "min_ms": 0.368,
+     "max_ms": 0.456,
+     "tiempos_ms": [
+      0.411,
+      0.368,
+      0.39,
+      0.378,
+      0.456,
+      0.413,
+      0.399
+     ],
+     "filas": 4,
+     "nodos": [
+      "Bitmap Heap Scan variante",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan genotipo (ix_gen_var_hash)",
+      "Seq Scan muestra_germinal",
+      "Seq Scan muestra_tumoral",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 12.704610824584961
+    }
+   },
+   "C6": {
+    "sin": {
+     "mediana_ms": 5.558,
+     "min_ms": 5.132,
+     "max_ms": 5.782,
+     "tiempos_ms": [
+      5.661,
+      5.694,
+      5.132,
+      5.782,
+      5.361,
+      5.498,
+      5.558
+     ],
+     "filas": 6,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 5.167,
+     "min_ms": 5.131,
+     "max_ms": 5.417,
+     "tiempos_ms": [
+      5.194,
+      5.131,
+      5.167,
+      5.156,
+      5.154,
+      5.417,
+      5.297
+     ],
+     "filas": 6,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 11.77525520324707
+    },
+    "B": {
+     "mediana_ms": 5.184,
+     "min_ms": 5.127,
+     "max_ms": 5.303,
+     "tiempos_ms": [
+      5.217,
+      5.303,
+      5.184,
+      5.151,
+      5.158,
+      5.237,
+      5.127
+     ],
+     "filas": 6,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 8.313417434692383
+    }
+   }
+  },
+  "c3_vista_materializada": {
+   "mediana_ms": 0.856,
+   "min_ms": 0.804,
+   "max_ms": 0.913,
+   "tiempos_ms": [
+    0.857,
+    0.835,
+    0.856,
+    0.804,
+    0.893,
+    0.822,
+    0.913
+   ],
+   "filas": 67,
+   "nodos": [
+    "Seq Scan muestra",
+    "Seq Scan muestra_corrida",
+    "Seq Scan mv_frec_variante",
+    "Seq Scan variante"
+   ],
+   "t_refresh_ms": 9.202241897583008,
+   "t_crear_ms": 9.774923324584961
+  },
+  "actualizaciones": {
+   "sin": {
+    "insert_5000_genotipos": {
+     "mediana_ms": 120.922,
+     "tiempos_ms": [
+      116.37,
+      119.78,
+      121.75800000000001,
+      125.859,
+      121.31,
+      120.59200000000001,
+      120.922
+     ]
+    },
+    "update_1000_anotaciones": {
+     "mediana_ms": 16.418,
+     "tiempos_ms": [
+      18.952,
+      16.418,
+      16.277,
+      15.982,
+      16.269,
+      16.542,
+      16.463
+     ]
+    }
+   },
+   "con": {
+    "insert_5000_genotipos": {
+     "mediana_ms": 139.79899999999998,
+     "tiempos_ms": [
+      137.014,
+      136.05200000000002,
+      139.79899999999998,
+      134.481,
+      141.435,
+      144.224,
+      141.315
+     ]
+    },
+    "update_1000_anotaciones": {
+     "mediana_ms": 18.889000000000003,
+     "tiempos_ms": [
+      20.822,
+      18.195,
+      18.75,
+      18.338,
+      19.545,
+      19.497,
+      18.889000000000003
+     ]
+    }
+   },
+   "t_crear_finales_ms": 34.73496437072754,
+   "tam_indices": {
+    "ix_muestra_donante": 16384,
+    "ix_anot_patog": 16384,
+    "ix_anot_variante": 65536,
+    "ix_gen_var_mue": 2523136,
+    "ix_var_region": 98304,
+    "ix_gen_mue_var": 2490368
+   },
+   "genotipo_total": 12656640,
+   "genotipo_heap": 6553600
+  }
+ },
+ "100000": {
+  "n": 100000,
+  "t_carga_s": 4.435382604598999,
+  "conteos": {
+   "anotacion_clinica": 7557,
+   "anotacion_historial": 61,
+   "bitacora": 0,
+   "condicion": 200,
+   "corrida": 9,
+   "cromosoma": 25,
+   "donante": 100,
+   "exon": 15958,
+   "gen": 2000,
+   "genotipo": 100000,
+   "informe": 55,
+   "laboratorio": 3,
+   "muestra": 113,
+   "muestra_corrida": 115,
+   "muestra_germinal": 94,
+   "muestra_tumoral": 19,
+   "secuenciador": 10,
+   "stg_genotipo": 0,
+   "variante": 25000,
+   "variante_gen": 17613
+  },
+  "parametros": {
+   "donante": "CGA-D000046",
+   "crom": "1",
+   "ini": 1,
+   "fin": 50000000
+  },
+  "consultas": {
+   "C1": {
+    "sin": {
+     "mediana_ms": 4.532,
+     "min_ms": 4.347,
+     "max_ms": 4.721,
+     "tiempos_ms": [
+      4.721,
+      4.598,
+      4.499,
+      4.408,
+      4.54,
+      4.347,
+      4.532
+     ],
+     "filas": 129,
+     "nodos": [
+      "Bitmap Heap Scan genotipo",
+      "Index Scan condicion (condicion_pkey)",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan variante (variante_pkey)",
+      "Index Scan variante_gen (variante_gen_pkey)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan muestra"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 4.477,
+     "min_ms": 4.376,
+     "max_ms": 4.893,
+     "tiempos_ms": [
+      4.893,
+      4.695,
+      4.458,
+      4.498,
+      4.43,
+      4.376,
+      4.477
+     ],
+     "filas": 129,
+     "nodos": [
+      "Bitmap Heap Scan genotipo",
+      "Index Scan condicion (condicion_pkey)",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan variante (variante_pkey)",
+      "Index Scan variante_gen (variante_gen_pkey)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan muestra"
+     ],
+     "t_crear_indices_ms": 8.301973342895508
+    },
+    "B": {
+     "mediana_ms": 4.129,
+     "min_ms": 3.994,
+     "max_ms": 4.86,
+     "tiempos_ms": [
+      4.86,
+      4.569,
+      4.339,
+      4.129,
+      4.091,
+      4.123,
+      3.994
+     ],
+     "filas": 129,
+     "nodos": [
+      "Bitmap Heap Scan anotacion_clinica",
+      "Bitmap Heap Scan genotipo",
+      "Index Scan condicion (condicion_pkey)",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan variante (variante_pkey)",
+      "Index Scan variante_gen (variante_gen_pkey)",
+      "Seq Scan muestra"
+     ],
+     "t_crear_indices_ms": 4.386186599731445
+    }
+   },
+   "C2": {
+    "sin": {
+     "mediana_ms": 29.841,
+     "min_ms": 29.338,
+     "max_ms": 30.723,
+     "tiempos_ms": [
+      29.759,
+      29.338,
+      29.491,
+      30.326,
+      29.969,
+      30.723,
+      29.841
+     ],
+     "filas": 976,
+     "nodos": [
+      "Seq Scan anotacion_clinica",
+      "Seq Scan gen",
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 18.647,
+     "min_ms": 17.184,
+     "max_ms": 20.814,
+     "tiempos_ms": [
+      20.12,
+      18.647,
+      18.654,
+      17.209,
+      20.814,
+      17.421,
+      17.184
+     ],
+     "filas": 976,
+     "nodos": [
+      "Index Scan genotipo (ix_gen_variante)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan gen",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 41.06497764587402
+    },
+    "B": {
+     "mediana_ms": 15.169,
+     "min_ms": 14.455,
+     "max_ms": 16.496,
+     "tiempos_ms": [
+      16.496,
+      15.124,
+      16.314,
+      15.169,
+      14.618,
+      15.981,
+      14.455
+     ],
+     "filas": 976,
+     "nodos": [
+      "Index Only Scan anotacion_clinica (ix_anot_patog)",
+      "Index Only Scan genotipo (ix_gen_var_cub)",
+      "Seq Scan gen",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 57.36589431762695
+    }
+   },
+   "C3": {
+    "sin": {
+     "mediana_ms": 121.211,
+     "min_ms": 117.712,
+     "max_ms": 129.497,
+     "tiempos_ms": [
+      123.424,
+      117.712,
+      120.766,
+      129.497,
+      125.835,
+      120.957,
+      121.211
+     ],
+     "filas": 558,
+     "nodos": [
+      "Index Scan variante (variante_pkey)",
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 119.008,
+     "min_ms": 116.617,
+     "max_ms": 121.737,
+     "tiempos_ms": [
+      119.008,
+      116.617,
+      118.91,
+      118.109,
+      121.737,
+      119.971,
+      121.229
+     ],
+     "filas": 558,
+     "nodos": [
+      "Index Scan variante (variante_pkey)",
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 39.98303413391113
+    },
+    "B": {
+     "mediana_ms": 118.894,
+     "min_ms": 118.572,
+     "max_ms": 122.301,
+     "tiempos_ms": [
+      118.572,
+      118.766,
+      118.894,
+      118.588,
+      120.615,
+      119.61,
+      122.301
+     ],
+     "filas": 558,
+     "nodos": [
+      "Index Only Scan genotipo (ix_gen_var_mue)",
+      "Index Scan muestra (muestra_pkey)",
+      "Index Scan variante (variante_pkey)",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 61.9049072265625
+    }
+   },
+   "C5": {
+    "sin": {
+     "mediana_ms": 20.124,
+     "min_ms": 19.944,
+     "max_ms": 33.246,
+     "tiempos_ms": [
+      33.246,
+      22.828,
+      20.108,
+      20.417,
+      19.944,
+      19.984,
+      20.124
+     ],
+     "filas": 90,
+     "nodos": [
+      "Bitmap Heap Scan variante",
+      "Seq Scan gen",
+      "Seq Scan genotipo",
+      "Seq Scan muestra_germinal",
+      "Seq Scan muestra_tumoral",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 3.639,
+     "min_ms": 3.476,
+     "max_ms": 3.861,
+     "tiempos_ms": [
+      3.861,
+      3.733,
+      3.73,
+      3.598,
+      3.639,
+      3.54,
+      3.476
+     ],
+     "filas": 90,
+     "nodos": [
+      "Bitmap Heap Scan variante",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan genotipo (ix_gen_variante)",
+      "Seq Scan muestra_germinal",
+      "Seq Scan muestra_tumoral",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 69.41390037536621
+    },
+    "B": {
+     "mediana_ms": 3.629,
+     "min_ms": 3.444,
+     "max_ms": 3.882,
+     "tiempos_ms": [
+      3.882,
+      3.629,
+      3.644,
+      3.651,
+      3.444,
+      3.488,
+      3.572
+     ],
+     "filas": 90,
+     "nodos": [
+      "Bitmap Heap Scan variante",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan genotipo (ix_gen_var_hash)",
+      "Seq Scan muestra_germinal",
+      "Seq Scan muestra_tumoral",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 113.83891105651855
+    }
+   },
+   "C6": {
+    "sin": {
+     "mediana_ms": 32.905,
+     "min_ms": 32.393,
+     "max_ms": 33.699,
+     "tiempos_ms": [
+      32.905,
+      32.717,
+      32.393,
+      33.699,
+      33.401,
+      33.491,
+      32.697
+     ],
+     "filas": 10,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 34.685,
+     "min_ms": 33.491,
+     "max_ms": 43.144,
+     "tiempos_ms": [
+      34.078,
+      33.651,
+      43.144,
+      39.189,
+      34.873,
+      34.685,
+      33.491
+     ],
+     "filas": 10,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 90.3017520904541
+    },
+    "B": {
+     "mediana_ms": 32.718,
+     "min_ms": 31.755,
+     "max_ms": 39.231,
+     "tiempos_ms": [
+      32.312,
+      32.718,
+      31.807,
+      31.755,
+      32.854,
+      39.231,
+      32.901
+     ],
+     "filas": 10,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 70.62888145446777
+    }
+   }
+  },
+  "c3_vista_materializada": {
+   "mediana_ms": 8.332,
+   "min_ms": 8.258,
+   "max_ms": 8.492,
+   "tiempos_ms": [
+    8.434,
+    8.272,
+    8.258,
+    8.456,
+    8.492,
+    8.329,
+    8.332
+   ],
+   "filas": 558,
+   "nodos": [
+    "Seq Scan muestra",
+    "Seq Scan muestra_corrida",
+    "Seq Scan mv_frec_variante",
+    "Seq Scan variante"
+   ],
+   "t_refresh_ms": 105.76796531677246,
+   "t_crear_ms": 110.21828651428223
+  },
+  "actualizaciones": {
+   "sin": {
+    "insert_5000_genotipos": {
+     "mediana_ms": 154.671,
+     "tiempos_ms": [
+      146.372,
+      159.919,
+      154.671,
+      151.389,
+      161.527,
+      150.31099999999998,
+      158.726
+     ]
+    },
+    "update_1000_anotaciones": {
+     "mediana_ms": 30.655,
+     "tiempos_ms": [
+      33.501,
+      31.332,
+      31.738,
+      29.951,
+      29.990000000000002,
+      30.655,
+      30.562
+     ]
+    }
+   },
+   "con": {
+    "insert_5000_genotipos": {
+     "mediana_ms": 169.441,
+     "tiempos_ms": [
+      167.70999999999998,
+      167.766,
+      164.103,
+      169.762,
+      169.441,
+      181.461,
+      207.078
+     ]
+    },
+    "update_1000_anotaciones": {
+     "mediana_ms": 33.576,
+     "tiempos_ms": [
+      42.706,
+      42.544,
+      33.374,
+      37.707,
+      33.19,
+      33.576,
+      32.399
+     ]
+    }
+   },
+   "t_crear_finales_ms": 195.80364227294922,
+   "tam_indices": {
+    "ix_muestra_donante": 16384,
+    "ix_anot_patog": 57344,
+    "ix_anot_variante": 352256,
+    "ix_gen_var_mue": 7012352,
+    "ix_var_region": 802816,
+    "ix_gen_mue_var": 7020544
+   },
+   "genotipo_total": 35323904,
+   "genotipo_heap": 14344192
+  }
+ },
+ "1000000": {
+  "n": 1000000,
+  "t_carga_s": 43.663642168045044,
+  "conteos": {
+   "anotacion_clinica": 75930,
+   "anotacion_historial": 789,
+   "bitacora": 0,
+   "condicion": 2000,
+   "corrida": 97,
+   "cromosoma": 25,
+   "donante": 1000,
+   "exon": 159735,
+   "gen": 20000,
+   "genotipo": 1000000,
+   "informe": 534,
+   "laboratorio": 3,
+   "muestra": 1216,
+   "muestra_corrida": 1280,
+   "muestra_germinal": 928,
+   "muestra_tumoral": 288,
+   "secuenciador": 10,
+   "stg_genotipo": 0,
+   "variante": 249998,
+   "variante_gen": 174928
+  },
+  "parametros": {
+   "donante": "CGA-D000940",
+   "crom": "1",
+   "ini": 1,
+   "fin": 50000000
+  },
+  "consultas": {
+   "C1": {
+    "sin": {
+     "mediana_ms": 21.11,
+     "min_ms": 19.981,
+     "max_ms": 21.701,
+     "tiempos_ms": [
+      21.574,
+      20.388,
+      19.981,
+      21.11,
+      20.303,
+      21.701,
+      21.54
+     ],
+     "filas": 208,
+     "nodos": [
+      "Bitmap Heap Scan genotipo",
+      "Index Scan condicion (condicion_pkey)",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan variante (variante_pkey)",
+      "Index Scan variante_gen (variante_gen_pkey)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan muestra"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 16.242,
+     "min_ms": 15.287,
+     "max_ms": 16.937,
+     "tiempos_ms": [
+      16.937,
+      16.019,
+      16.242,
+      16.473,
+      16.701,
+      15.426,
+      15.287
+     ],
+     "filas": 208,
+     "nodos": [
+      "Bitmap Heap Scan genotipo",
+      "Index Scan anotacion_clinica (ix_anot_variante)",
+      "Index Scan condicion (condicion_pkey)",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan muestra (ix_muestra_donante)",
+      "Index Scan variante (variante_pkey)",
+      "Index Scan variante_gen (variante_gen_pkey)"
+     ],
+     "t_crear_indices_ms": 40.595054626464844
+    },
+    "B": {
+     "mediana_ms": 14.284,
+     "min_ms": 14.007,
+     "max_ms": 17.24,
+     "tiempos_ms": [
+      14.284,
+      15.218,
+      14.59,
+      14.047,
+      14.007,
+      14.055,
+      17.24
+     ],
+     "filas": 208,
+     "nodos": [
+      "Bitmap Heap Scan genotipo",
+      "Index Scan anotacion_clinica (ix_anot_patog)",
+      "Index Scan condicion (condicion_pkey)",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan muestra (ix_muestra_donante)",
+      "Index Scan variante (variante_pkey)",
+      "Index Scan variante_gen (variante_gen_pkey)"
+     ],
+     "t_crear_indices_ms": 18.067359924316406
+    }
+   },
+   "C2": {
+    "sin": {
+     "mediana_ms": 179.198,
+     "min_ms": 176.975,
+     "max_ms": 181.437,
+     "tiempos_ms": [
+      178.621,
+      176.975,
+      181.179,
+      180.38,
+      181.437,
+      179.198,
+      177.926
+     ],
+     "filas": 9523,
+     "nodos": [
+      "Seq Scan anotacion_clinica",
+      "Seq Scan gen",
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 224.954,
+     "min_ms": 217.704,
+     "max_ms": 228.489,
+     "tiempos_ms": [
+      217.704,
+      228.489,
+      220.807,
+      225.027,
+      228.144,
+      224.954,
+      224.43
+     ],
+     "filas": 9523,
+     "nodos": [
+      "Index Scan genotipo (ix_gen_variante)",
+      "Index Scan muestra (muestra_pkey)",
+      "Seq Scan anotacion_clinica",
+      "Seq Scan gen",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 345.2620506286621
+    },
+    "B": {
+     "mediana_ms": 174.538,
+     "min_ms": 167.405,
+     "max_ms": 181.024,
+     "tiempos_ms": [
+      174.538,
+      177.487,
+      181.024,
+      170.941,
+      167.405,
+      177.058,
+      167.49
+     ],
+     "filas": 9523,
+     "nodos": [
+      "Index Only Scan anotacion_clinica (ix_anot_patog)",
+      "Index Only Scan genotipo (ix_gen_var_cub)",
+      "Index Scan muestra (muestra_pkey)",
+      "Seq Scan gen",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 576.6005516052246
+    }
+   },
+   "C3": {
+    "sin": {
+     "mediana_ms": 1383.768,
+     "min_ms": 1364.01,
+     "max_ms": 1462.113,
+     "tiempos_ms": [
+      1462.113,
+      1364.01,
+      1385.985,
+      1425.805,
+      1383.768,
+      1371.806,
+      1379.596
+     ],
+     "filas": 2865,
+     "nodos": [
+      "Index Scan variante (variante_pkey)",
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 1400.795,
+     "min_ms": 1388.675,
+     "max_ms": 1473.888,
+     "tiempos_ms": [
+      1473.888,
+      1433.47,
+      1400.795,
+      1389.971,
+      1402.148,
+      1389.577,
+      1388.675
+     ],
+     "filas": 2865,
+     "nodos": [
+      "Index Scan variante (variante_pkey)",
+      "Seq Scan genotipo",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 414.8550033569336
+    },
+    "B": {
+     "mediana_ms": 1154.474,
+     "min_ms": 1151.366,
+     "max_ms": 1192.928,
+     "tiempos_ms": [
+      1192.928,
+      1156.467,
+      1152.981,
+      1151.366,
+      1154.474,
+      1153.989,
+      1163.476
+     ],
+     "filas": 2865,
+     "nodos": [
+      "Index Only Scan genotipo (ix_gen_var_mue)",
+      "Index Scan muestra (muestra_pkey)",
+      "Index Scan variante (variante_pkey)",
+      "Seq Scan muestra",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 614.4142150878906
+    }
+   },
+   "C5": {
+    "sin": {
+     "mediana_ms": 92.511,
+     "min_ms": 90.665,
+     "max_ms": 95.672,
+     "tiempos_ms": [
+      95.672,
+      91.874,
+      90.665,
+      92.511,
+      92.037,
+      92.913,
+      93.193
+     ],
+     "filas": 905,
+     "nodos": [
+      "Bitmap Heap Scan variante",
+      "Index Scan gen (gen_pkey)",
+      "Seq Scan genotipo",
+      "Seq Scan muestra_germinal",
+      "Seq Scan muestra_tumoral",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 37.263,
+     "min_ms": 36.706,
+     "max_ms": 39.659,
+     "tiempos_ms": [
+      39.659,
+      38.573,
+      38.797,
+      37.263,
+      36.888,
+      37.03,
+      36.706
+     ],
+     "filas": 905,
+     "nodos": [
+      "Bitmap Heap Scan variante",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan genotipo (ix_gen_variante)",
+      "Seq Scan muestra_germinal",
+      "Seq Scan muestra_tumoral",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 594.4790840148926
+    },
+    "B": {
+     "mediana_ms": 38.268,
+     "min_ms": 37.788,
+     "max_ms": 43.94,
+     "tiempos_ms": [
+      43.94,
+      38.501,
+      38.422,
+      38.23,
+      38.268,
+      37.866,
+      37.788
+     ],
+     "filas": 905,
+     "nodos": [
+      "Bitmap Heap Scan variante",
+      "Index Scan gen (gen_pkey)",
+      "Index Scan genotipo (ix_gen_var_hash)",
+      "Seq Scan muestra_germinal",
+      "Seq Scan muestra_tumoral",
+      "Seq Scan variante_gen"
+     ],
+     "t_crear_indices_ms": 1309.2937469482422
+    }
+   },
+   "C6": {
+    "sin": {
+     "mediana_ms": 1434.134,
+     "min_ms": 1401.529,
+     "max_ms": 1504.566,
+     "tiempos_ms": [
+      1413.244,
+      1437.207,
+      1476.798,
+      1434.134,
+      1504.566,
+      1424.735,
+      1401.529
+     ],
+     "filas": 161,
+     "nodos": [
+      "Seq Scan genotipo",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 0.0
+    },
+    "A": {
+     "mediana_ms": 495.101,
+     "min_ms": 486.573,
+     "max_ms": 511.319,
+     "tiempos_ms": [
+      492.479,
+      487.47,
+      511.319,
+      503.05,
+      495.101,
+      486.573,
+      497.103
+     ],
+     "filas": 161,
+     "nodos": [
+      "Index Scan genotipo (ix_gen_mue_var)",
+      "Seq Scan genotipo",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 974.1945266723633
+    },
+    "B": {
+     "mediana_ms": 477.326,
+     "min_ms": 470.483,
+     "max_ms": 500.312,
+     "tiempos_ms": [
+      494.732,
+      500.312,
+      485.997,
+      470.483,
+      476.1,
+      470.982,
+      477.326
+     ],
+     "filas": 161,
+     "nodos": [
+      "Index Scan genotipo (ix_gen_var_mue2)",
+      "Seq Scan genotipo",
+      "Seq Scan muestra_corrida"
+     ],
+     "t_crear_indices_ms": 649.878740310669
+    }
+   }
+  },
+  "c3_vista_materializada": {
+   "mediana_ms": 61.722,
+   "min_ms": 60.299,
+   "max_ms": 67.114,
+   "tiempos_ms": [
+    63.253,
+    67.114,
+    61.722,
+    61.023,
+    60.299,
+    60.381,
+    64.382
+   ],
+   "filas": 2865,
+   "nodos": [
+    "Seq Scan muestra",
+    "Seq Scan muestra_corrida",
+    "Seq Scan mv_frec_variante",
+    "Seq Scan variante"
+   ],
+   "t_refresh_ms": 1247.9298114776611,
+   "t_crear_ms": 1216.0801887512207
+  },
+  "actualizaciones": {
+   "sin": {
+    "insert_5000_genotipos": {
+     "mediana_ms": 146.442,
+     "tiempos_ms": [
+      154.75,
+      153.877,
+      142.613,
+      147.679,
+      146.442,
+      146.389,
+      143.993
+     ]
+    },
+    "update_1000_anotaciones": {
+     "mediana_ms": 45.801,
+     "tiempos_ms": [
+      55.266,
+      46.782000000000004,
+      46.015,
+      45.446,
+      45.801,
+      45.134,
+      45.682
+     ]
+    }
+   },
+   "con": {
+    "insert_5000_genotipos": {
+     "mediana_ms": 152.51999999999998,
+     "tiempos_ms": [
+      150.391,
+      152.095,
+      155.32999999999998,
+      152.51999999999998,
+      154.26,
+      152.677,
+      151.312
+     ]
+    },
+    "update_1000_anotaciones": {
+     "mediana_ms": 45.99,
+     "tiempos_ms": [
+      53.077999999999996,
+      45.457,
+      45.84,
+      45.229,
+      45.99,
+      47.978,
+      48.8
+     ]
+    }
+   },
+   "t_crear_finales_ms": 2143.6543464660645,
+   "tam_indices": {
+    "ix_muestra_donante": 57344,
+    "ix_anot_patog": 360448,
+    "ix_anot_variante": 1679360,
+    "ix_gen_var_mue": 51650560,
+    "ix_var_region": 7905280,
+    "ix_gen_mue_var": 51707904
+   },
+   "genotipo_total": 260014080,
+   "genotipo_heap": 91111424
+  }
+ }
+}

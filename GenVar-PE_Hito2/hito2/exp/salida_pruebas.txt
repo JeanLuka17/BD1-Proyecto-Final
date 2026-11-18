@@ -1,0 +1,80 @@
+SET
+INSERT 0 1
+psql:sql/09_pruebas.sql:16: NOTICE:  Prueba 1 OK -> El donante CGA-DTEST01 no tiene consentimiento informado
+DO
+UPDATE 1
+CALL
+  id_muestra  |  estado  | fuente 
+--------------+----------+--------
+ CGA-MTEST001 | RECIBIDA | SANGRE
+
+psql:sql/09_pruebas.sql:28: NOTICE:  Prueba 3 OK -> La muestra CGA-MTEST001 ya es germinal
+DO
+psql:sql/09_pruebas.sql:35: NOTICE:  Prueba 4 OK -> La muestra CGA-MTEST002 no es germinal ni tumoral
+DO
+INSERT 0 1
+psql:sql/09_pruebas.sql:42: NOTICE:  Prueba 5 OK -> La muestra CGA-MTEST001 se colectó (2026-09-01) después del inicio de la corrida RUN-TEST1 (2026-08-15)
+DO
+psql:sql/09_pruebas.sql:48: NOTICE:  Prueba 6 OK -> La corrida RUN-TEST1 no tiene muestras y no puede completarse
+DO
+INSERT 0 1
+INSERT 0 1
+  id_muestra  | estado_tras_entrar_a_corrida 
+--------------+------------------------------
+ CGA-MTEST001 | EN_PROCESO
+
+INSERT 0 2
+CALL
+     evento      |                      detalle                       
+-----------------+----------------------------------------------------
+ CARGA_GENOTIPOS | corrida RUN-TEST2: 2 variantes nuevas, 2 genotipos
+
+UPDATE 1
+  corrida   | tiene_fecha_fin |   muestra   
+------------+-----------------+-------------
+ COMPLETADA | t               | SECUENCIADA
+
+psql:sql/09_pruebas.sql:67: NOTICE:  Prueba 8 OK -> insert or update on table "genotipo" violates foreign key constraint "genotipo_id_muestra_id_corrida_fkey"
+DO
+CALL
+ id_anotacion | significancia_anterior | significancia_nueva | fecha_cambio 
+--------------+------------------------+---------------------+--------------
+ SCV000000002 | VUS                    | PATOGENICA          | 2026-09-30
+
+ id_variante |   rsid    | cromosoma | posicion | genotipo |   gen   |    consecuencia    |              condicion               | significancia 
+-------------+-----------+-----------+----------+----------+---------+--------------------+--------------------------------------+---------------
+      149291 | rs1149291 | 1         |  5113587 | 0/1      | GV01469 | stop_gained        | Miocardiopatía hipertrófica tipo 102 | PATOGENICA
+      149291 | rs1149291 | 1         |  5113587 | 1/1      | GV01469 | stop_gained        | Miocardiopatía hipertrófica tipo 102 | PATOGENICA
+       46428 |           | 1         | 31848368 | 1/1      | GV05452 | missense_variant   | Distrofia muscular tipo 139          | PATOGENICA
+       58663 |           | 1         | 52525017 | 0/1      | GV15769 | frameshift_variant | Epilepsia infantil tipo 70           | PATOGENICA
+       15075 | rs1015075 | 1         | 82714649 | 0/1      | GV19309 | frameshift_variant | Síndrome de Lynch tipo 20            | PATOGENICA
+
+ genotipos_antes 
+-----------------
+               2
+
+CALL
+ muestras_despues 
+------------------
+                0
+
+ genotipos_despues 
+-------------------
+                 0
+
+        evento         |                        detalle                        
+-----------------------+-------------------------------------------------------
+ REVOCA_CONSENTIMIENTO | donante CGA-DTEST01: 1 muestras eliminadas en cascada
+
+ tipo_variante | count  
+---------------+--------
+ SNV           | 212547
+ DELECION      |  20035
+ INSERCION     |  14999
+ MNV           |   2419
+
+DELETE 1
+DELETE 2
+UPDATE 1
+DELETE 2
+DELETE 2
